@@ -1,16 +1,16 @@
 {
-	"id": "your-module-name",
-	"name": "your-module-name",
-	"shortname": "module-shortname",
-	"description": "A short one line description of your module",
+	"id": "generic-lowres-screensaver",
+	"name": "generic-lowres-screensaver",
+	"shortname": "lowres-screensaver",
+	"description": "A low-resolution screensaver using font glyphs for pixels and featuring Conway's Game of Life.",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-your-module-name.git",
-	"bugs": "https://github.com/bitfocus/companion-module-your-module-name/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-generic-lowres-screensaver.git",
+	"bugs": "https://github.com/bitfocus/companion-module-generic-lowres-screensaver/issues",
 	"maintainers": [
 		{
-			"name": "Your name",
-			"email": "Your email"
+			"name": "Ari Kornfeld",
+			"email": "arikorn@users.noreply.github.com"
 		}
 	],
 	"runtime": {
@@ -20,7 +20,16 @@
 		"entrypoint": "../dist/main.js"
 	},
 	"legacyIds": [],
-	"manufacturer": "Your company",
-	"products": ["Your product"],
-	"keywords": []
+	"manufacturer": "Generic",
+	"products": ["Lowres-Screensaver"],
+	"keywords": [
+		"screeensaver",
+		"screen-saver",
+		"game-of-life",
+		"conway",
+		"idle-screen",
+		"animation",
+		"lowres",
+		"generic"
+	]
 }

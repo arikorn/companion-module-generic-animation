@@ -1,18 +1,18 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, type ModuleConfig } from './config.js'
+import { GetConfigFields, type LowresScreensaverConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 
-export class ModuleInstance extends InstanceBase<ModuleConfig> {
-	config!: ModuleConfig // Setup in init()
+export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
+	config!: LowresScreensaverConfig // Setup in init()
 
 	constructor(internal: unknown) {
 		super(internal)
 	}
 
-	async init(config: ModuleConfig): Promise<void> {
+	async init(config: LowresScreensaverConfig): Promise<void> {
 		this.config = config
 
 		this.updateStatus(InstanceStatus.Ok)
@@ -26,7 +26,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.log('debug', 'destroy')
 	}
 
-	async configUpdated(config: ModuleConfig): Promise<void> {
+	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		this.config = config
 	}
 
@@ -48,4 +48,4 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 }
 
-runEntrypoint(ModuleInstance, UpgradeScripts)
+runEntrypoint(LowresScreensaverInstance, UpgradeScripts)

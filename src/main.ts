@@ -4,12 +4,16 @@ import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
-
+import { GameController } from './internal/controller.js'
 export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
 	config!: LowresScreensaverConfig // Setup in init()
 
+	state: GameController
+	boardSize = [10, 11] //[8, 9]
+
 	constructor(internal: unknown) {
 		super(internal)
+		this.state = new GameController(this.boardSize[0], this.boardSize[1])
 	}
 
 	async init(config: LowresScreensaverConfig): Promise<void> {
@@ -23,11 +27,15 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	}
 	// When module gets deleted
 	async destroy(): Promise<void> {
+		this.state.stop() // stop any running timer
 		this.log('debug', 'destroy')
 	}
 
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		this.config = config
+		this.boardSize = config.boardSize.split(',').map((val) => Number(val))
+		// TODO: if boardsize changed, update the Game Controller
+		this.state.genInterval = config.interval
 	}
 
 	// Return config fields for web config

@@ -23,6 +23,14 @@ export class GameOfLife {
 		this.wrap = true
 	}
 
+	nrow(): number {
+		return this.present.nrow()
+	}
+
+	ncol(): number {
+		return this.present.ncol()
+	}
+
 	setWrap(val: boolean): void {
 		this.wrap = val
 	}
@@ -36,10 +44,11 @@ export class GameOfLife {
 	}
 
 	// restore the last start of game:
-	resetBoard(): void {
+	resetBoard(): Grid {
 		this.clearHistory()
 		this.present = this.start
 		this.nAlive = this.countAlive()
+		return this.present
 	}
 
 	clear(): void {

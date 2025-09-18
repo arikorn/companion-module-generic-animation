@@ -3,7 +3,6 @@ import type { LowresScreensaverInstance } from './main.js'
 
 export const on = '⬛'
 export const off = '⬜'
-export const dims = [10, 11] //[8, 9]
 
 export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 	self.setFeedbackDefinitions({
@@ -39,14 +38,15 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 			callback: async (_feedback) => {
 				//const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				//const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				const textVal = Array.from({ length: dims[0] }, () => new Array(dims[1]).fill(off)) //.join('\n')
-				for (let x = 0; x < dims[0]; x++) {
-					textVal[x][x] = on
-				}
+				// const textVal = Array.from({ length: self.boardSize[0] }, () => new Array(self.boardSize[1]).fill(off)) //.join('\n')
+				// for (let x = 0; x < self.boardSize[0]; x++) {
+				// 	textVal[x][x] = on
+				// }
+
 				return {
 					color: combineRgb(146, 146, 146),
 					bgcolor: combineRgb(0, 0, 0),
-					text: textVal.map((val) => val.join('')).join('\n'),
+					text: self.state.getBoard().toGlyphString(off, on), // textVal.map((val) => val.join('')).join('\n'),
 					show_topbar: false,
 				}
 			},

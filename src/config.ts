@@ -1,27 +1,39 @@
-import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { type SomeCompanionConfigField } from '@companion-module/base' //Regex,
 
 export interface LowresScreensaverConfig {
-	host: string
-	port: number
+	boardSize: string
+	interval: number
 }
+
+const boardSizes = [
+	[30, 55],
+	[10, 11],
+	[27, 45],
+	[40, 88],
+]
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
-			type: 'textinput',
-			id: 'host',
-			label: 'Target IP',
+			type: 'dropdown',
+			id: 'boardSize',
+			label: 'Internal Board Size',
 			width: 8,
-			regex: Regex.IP,
+			choices: [
+				...boardSizes.map((val) => {
+					return { id: val.join(','), label: val.join('x') }
+				}),
+			],
+			default: boardSizes[1].join(','),
 		},
 		{
 			type: 'number',
-			id: 'port',
-			label: 'Target Port',
-			width: 4,
-			min: 1,
-			max: 65535,
-			default: 8000,
+			id: 'interval',
+			label: 'Interval between turns',
+			width: 5,
+			min: 10,
+			max: 1000,
+			default: 500,
 		},
 	]
 }

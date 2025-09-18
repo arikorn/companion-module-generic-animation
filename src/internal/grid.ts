@@ -55,11 +55,11 @@ export class Grid extends Array<Array<number>> {
 	}
 
 	val(idx: Coord): number {
-		return this[idx.x][idx.y]
+		return this[idx.y][idx.x]
 	}
 
 	set(idx: Coord, val: number): void {
-		this[idx.x][idx.y] = val
+		this[idx.y][idx.x] = val
 	}
 
 	wipe(dir: Wipe, fromGrid: Grid | null = null, pos = 0): Grid {
@@ -195,5 +195,9 @@ export class Grid extends Array<Array<number>> {
 
 	equals(b: Grid): boolean {
 		return this.every((rowArray, rowIdx) => rowArray.every((cellVal, colIdx) => cellVal === b[rowIdx][colIdx]))
+	}
+
+	toGlyphString(off: string, on: string): string {
+		return this.map((rowArray) => rowArray.map((cell) => (cell === 0 ? off : on)).join('')).join('\n')
 	}
 }

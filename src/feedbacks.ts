@@ -3,6 +3,7 @@ import type { LowresScreensaverInstance } from './main.js'
 
 export const on = '⬛'
 export const off = '⬜'
+export const buttonSize = { rows: 10, cols: 11 } // rows, columns within a button.
 
 export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 	self.setFeedbackDefinitions({
@@ -18,11 +19,18 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 					choices: [{ id: '$(this:row),$(this:column)', label: 'Just this' }],
 					default: '$(this:row),$(this:column)',
 				},
+				{
+					// this does not show up in options:
+					id: 'X_Y_const',
+					type: 'static-text',
+					label: 'X/Y, too',
+					value: '$(this:row),$(this:column)',
+				},
 			],
 			callback: async (feedback, context) => {
 				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				const opt = feedback.options.X_Y
+				const opt = feedback.options.X_Y // not parsed with companion/base 1.11.x
 				return {
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(72, 72, 72),
@@ -33,20 +41,34 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 		Conway: {
 			type: 'advanced',
 			name: 'Setup a Conway button',
-			description: 'Change button text',
+			description: 'Setup a button that represents an entire grid (not usually used)',
 			options: [],
 			callback: async (_feedback) => {
 				//const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				//const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				// const textVal = Array.from({ length: self.boardSize[0] }, () => new Array(self.boardSize[1]).fill(off)) //.join('\n')
-				// for (let x = 0; x < self.boardSize[0]; x++) {
-				// 	textVal[x][x] = on
-				// }
 
 				return {
 					color: combineRgb(146, 146, 146),
 					bgcolor: combineRgb(0, 0, 0),
-					text: self.state.getBoard().toGlyphString(off, on), // textVal.map((val) => val.join('')).join('\n'),
+					text: self.state.getBoard().toGlyphString(off, on),
+					show_topbar: false,
+				}
+			},
+		},
+		ConwayMulti: {
+			type: 'advanced',
+			name: 'Setup a Conway-subset button',
+			description: 'Setup of a button that represents part of the whole grid. ',
+			options: [],
+			callback: async (_feedback, context) => {
+				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
+				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
+				const { rows: hButton, cols: wButton } = buttonSize
+				const span = { x: controlX * wButton, y: controlY * hButton, w: wButton, h: hButton }
+				return {
+					color: combineRgb(146, 146, 146),
+					bgcolor: combineRgb(0, 0, 0),
+					text: self.state.getBoard().toGlyphString(off, on, span),
 					show_topbar: false,
 				}
 			},

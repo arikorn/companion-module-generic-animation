@@ -5,6 +5,13 @@ export interface Coord {
 	y: number
 }
 
+export interface Span {
+	x: number
+	y: number
+	w: number
+	h: number
+}
+
 export enum Wipe {
 	Up, // defaults to 0
 	Down, // defaults to 1
@@ -140,10 +147,10 @@ export class Grid extends Array<Array<number>> {
 	}
 
 	// note: toggle is not generalized: it will set the value to 0 or val (or 1 if val is missing)
-	//  coordinates are expressed as a nested array [[x1,y1,val1?], [x2,y2,val2?], ...]
+	//  coordinates are expressed as a nested array [[row1,col1,val1?], [row2,col2,val2?], ...]
 	//   "val" is optional and defaults to 1
-	setShape(idx: number[][], toggle = false, offset = [0, 0]): void {
-		idx.forEach((coord) => {
+	setShape(coords: number[][], toggle = false, offset = [0, 0]): void {
+		coords.forEach((coord) => {
 			let row = coord[0] + offset[0]
 			let col = coord[1] + offset[1]
 			const val = coord.length > 2 ? coord[2] : 1
@@ -197,7 +204,36 @@ export class Grid extends Array<Array<number>> {
 		return this.every((rowArray, rowIdx) => rowArray.every((cellVal, colIdx) => cellVal === b[rowIdx][colIdx]))
 	}
 
-	toGlyphString(off: string, on: string): string {
-		return this.map((rowArray) => rowArray.map((cell) => (cell === 0 ? off : on)).join('')).join('\n')
+	// turn a grid, or a rectangular subset of it (a span), into a character string
+	//  the character string supports only binary values 0 = off, everything else is on
+	toGlyphString(off: string, on: string, span: Span | null = null): string {
+		if (span !== null) {
+			const { x: x1, y: y1, w, h } = span
+			const x2 = Math.min(x1 + w, this.ncol())
+			const y2 = Math.min(y1 + h, this.nrow())
+			const x2excess = Array.from({ length: x1 + w - x2 }, () => -1)
+			const y2shortfall = y1 + h - y2
+
+			const resultAr: number[][] = []
+
+			for (let row = y1; row < y2; row++) {
+				const newRow = this[row].slice(x1, x2)
+				if (x2excess.length > 0) {
+					newRow.push(...x2excess)
+				}
+				resultAr.push(newRow)
+			}
+			if (y2shortfall > 0) {
+				const blankrow = Array.from({ length: w }, () => -1)
+				resultAr.push(...Array.from({ length: y2shortfall }, () => blankrow))
+			}
+			return toGlyphStringInternal(resultAr, off, on)
+		} else {
+			return toGlyphStringInternal(this, off, on)
+		}
 	}
+}
+
+function toGlyphStringInternal(grid: number[][], off: string, on: string, out: string = '⬚'): string {
+	return grid.map((rowArray) => rowArray.map((cell) => (cell === 0 ? off : cell > 0 ? on : out)).join('')).join('\n')
 }

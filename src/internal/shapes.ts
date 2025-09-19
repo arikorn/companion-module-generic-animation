@@ -13,6 +13,24 @@ export function setWithCategory(shapeName: string, category: string, shape: numb
 	}
 }
 
+// return the extent of a list of points: note that it can have negative extent
+// result is [minRow, maxRow, minCol, maxCol]
+export function getShapeExtent(shape: number[][]): number[] {
+	const minRow = shape[0][0]
+	const maxRow = minRow
+	const minCol = shape[0][1]
+	const maxCol = minCol
+	return shape.reduce(
+		(prev, curr) => [
+			Math.min(prev[0], curr[0]),
+			Math.max(prev[1], curr[0]),
+			Math.min(prev[2], curr[1]),
+			Math.max(prev[3], curr[1]),
+		],
+		[minRow, maxRow, minCol, maxCol],
+	)
+}
+
 // shift a shape along the x axis (columns)
 export function shiftx(coords: number[][], offs: number): number[][] {
 	return coords.map((bit) => [bit[0], bit[1] + offs])

@@ -12,7 +12,7 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 
 # TO DO:
 
-- [ ] Allow offsets for positioning; finish positioning options
+- [x] Allow offsets for positioning; finish positioning options
 - [ ] Allow adding more than one shape?
 - [ ] Random shape selection with auto-chaining of games
 - [ ] Customize within-button grid size

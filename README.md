@@ -14,6 +14,7 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 
 - [ ] Change [row,col] to the more standard [col, row], i.e., [x, y]
 - [ ] Add demo with freighters going different dirs in each row...
+- [ ] Configurable background shape (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
 - [ ] Allow adding more than one shape?
@@ -34,7 +35,7 @@ See the user [HELP.md](./companion/HELP.md) for more details...
   - [ ] Specify the font size explicitly
   - [ ] Don't use Conway for wipe animation (or tell it to skip calculations...)
   - [ ] Would generating a PNG image directly be more efficient?
-- [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5)
+- [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5) - maybe with half-tone anti-aliasing?
 - [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)
 
 NOTE: Currently, the game appears to have a maximum speed of 8 updates/second (125 ms) regardless of board size

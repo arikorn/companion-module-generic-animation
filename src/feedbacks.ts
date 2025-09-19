@@ -1,8 +1,24 @@
 import { combineRgb } from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
 
-export const on = '⬛'
-export const off = '⬜'
+export const on = '\u2589' //'⯀' = \u2BC0  matches the blanks but is small //'⬛' \u2B1B ?
+export const off = '⬜' //'\u115F' //'⬚'
+// candidates for on
+//'⬛' \u2B1B ? - from noto symbol 2 Geometric shapes - symbols and emoji
+// '\u2588' - "full block" but not square (too tall)
+// '\u2587' - "lower 7/8 block" is square but slightly too big..
+// '\u2589' - "left 7/8 block" is just right!
+// '\u25A0' is tiny!
+
+// candidates for off:
+// braille blank: '\u2800' - too narrow
+// '\u115F' HANGUL CHOSEONG FILLER -- pretty close
+// U+1160 HANGUL JUNGSEONG FILLER -- same
+// '\u3164' HANGUL FILLER - same
+// '⬚' --similar to above and good compromise with complete blank
+// '⬜' -- \u2B1C, a perfect match for 2B1B or 2589, but brightest BG. Sanme Noto Symbol 2 group.
+// various others either aren't blank or are zero-width such as '\ufffc' '\uE002F' '\u2000' series (en quad, en space, etc.)
+//  right-t-left mark: '\u200F' has zero width
 
 export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 	self.setFeedbackDefinitions({

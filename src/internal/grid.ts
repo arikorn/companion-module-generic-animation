@@ -234,6 +234,6 @@ export class Grid extends Array<Array<number>> {
 	}
 }
 
-function toGlyphStringInternal(grid: number[][], off: string, on: string, out: string = '⬚'): string {
+function toGlyphStringInternal(grid: number[][], off: string, on: string, out: string = '\u115F'): string {
 	return grid.map((rowArray) => rowArray.map((cell) => (cell === 0 ? off : cell > 0 ? on : out)).join('')).join('\n')
 }

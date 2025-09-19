@@ -10,8 +10,7 @@ export class GameController {
 	theGame: GameOfLife
 
 	// state for the UI:
-	boardSize: number[]
-	board: Grid //theGame.present
+	//board: Grid //theGame.present
 	generation = 0
 	running: NodeJS.Timeout | null
 	// callback for the UI to update itself after each step (whether wipe or Conway)
@@ -25,8 +24,7 @@ export class GameController {
 
 	constructor(nrow: number, ncol: number) {
 		this.theGame = new GameOfLife(nrow, ncol)
-		this.boardSize = [nrow, ncol]
-		this.board = this.theGame.present
+		//this.board = this.theGame.present
 		this.running = null
 	}
 
@@ -34,13 +32,18 @@ export class GameController {
 		return this.theGame.present
 	}
 
+	getBoardSize(): number[] {
+		return [this.theGame.nrow(), this.theGame.ncol()]
+	}
+
 	isRunning(): boolean {
 		return this.running !== null
 	}
 
-	// setup the generational timer
+	// the generational callback and timer start/stop/step functions
 	nextRound(): void {
-		this.board = this.theGame.next() // create next generation
+		//this.board =
+		this.theGame.next() // create next generation
 		this.generation += 1
 		const status = this.theGame.analyzeBoard()
 		if (status === 0 || status === 1) {

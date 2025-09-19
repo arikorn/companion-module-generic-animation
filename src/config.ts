@@ -8,7 +8,7 @@ export interface LowresScreensaverConfig {
 const boardSizes = [
 	[30, 55],
 	[10, 11],
-	[27, 45],
+	[30, 45],
 	[40, 88],
 ]
 

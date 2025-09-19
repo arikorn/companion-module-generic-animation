@@ -1,6 +1,4 @@
-// import { useInterval } from './useInterval'
 import { WipeEffect } from './wipeEffect.js'
-// import { useGlobalUndo } from './useGlobalUndo'
 import { Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
 import { shapes } from './shapes.js' //shapesByCategory, transpose

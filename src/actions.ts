@@ -1,6 +1,7 @@
 import type { LowresScreensaverInstance } from './main.js'
 import { Grid } from './internal/grid.js'
 import { shapes, getShapeExtent /*, shapesByCategory*/ } from './internal/shapes.js'
+import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault } from './config.js'
 
 function makeChoices(strMap: Map<string, number[][]>): any {
 	return Array.from(strMap.keys()).map((val) => ({ id: val, label: val }))
@@ -32,9 +33,9 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					action = self.state.isRunning() ? 0 : 1
 				}
 				if (action === 0) {
-					self.state.stop()
+					self.stopGame()
 				} else {
-					self.state.start((_controller) => self.checkFeedbacks())
+					self.startGame()
 				}
 			},
 		},
@@ -129,26 +130,82 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			},
 		},
 		//============================
-		setInterval: {
-			name: 'Set Generation Time',
+		setButtonGrid: {
+			name: 'Set Button Grid Size',
+			options: [
+				{
+					id: 'size',
+					type: 'dropdown',
+					label: 'Button Grid, Internal Size',
+					choices: buttonSizeChoices(),
+					default: buttonSizeDefault(),
+					tooltip: 'Choose the grid-size within each button.',
+				},
+			],
+			callback: async (event) => {
+				if (event.options.size !== undefined) {
+					await self.setButtonGridSize(String(event.options.size))
+				}
+			},
+		},
+		//============================
+		setGridSize: {
+			name: 'Set Board Grid Size',
+			options: [
+				{
+					id: 'size',
+					type: 'dropdown',
+					label: 'Game Board Grid Size',
+					choices: boardSizeChoices(),
+					default: boardSizeDefault(),
+					tooltip: 'Choose the grid-size within each button.',
+				},
+			],
+			callback: async (event) => {
+				if (event.options.size !== undefined) {
+					await self.setBoardSize(String(event.options.size))
+				}
+			},
+		},
+		//============================
+		setGameRate: {
+			name: 'Set Game Update Rate',
 			options: [
 				{
 					id: 'time',
 					type: 'number',
-					label: 'ms',
-					default: 400,
-					min: 10,
-					max: 1000,
+					label: 'Frequency (rounds/second)',
+					default: 5,
+					min: 1,
+					max: 10,
 					range: true,
-					tooltip: 'Enter the delay between generations, in milliseconds.',
+					tooltip: 'Enter the number of generations per second. (Note: 8 may be the actual max)',
 				},
 			],
 			callback: async (event) => {
-				const ms: number = Number(event.options.time)
-				if (!isNaN(ms)) {
+				const rate: number = Number(event.options.time)
+				if (!isNaN(rate)) {
 					// enforce the range
-					self.setGenerationInterval(Math.max(10, Math.min(1000, ms)))
+					self.setGenerationRate(Math.max(1, Math.min(10, rate)))
 				}
+			},
+		},
+		//============================
+		setGameWrap: {
+			name: 'Set Game Board Wrapping',
+			description: 'Wrap the game board so the left edge continues on the right edge, etc. ',
+			options: [
+				{
+					id: 'wrap',
+					type: 'checkbox',
+					label: 'Wrap the grid',
+					default: true,
+					tooltip: 'Wrap the grid so edges continue on the opposite side',
+				},
+			],
+			callback: async (event) => {
+				const wrap = Boolean(event.options.wrap)
+				await self.setWrap(wrap)
 			},
 		},
 	})

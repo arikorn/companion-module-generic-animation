@@ -12,14 +12,19 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 
 # TO DO:
 
+- [ ] Change [row,col] to the more standard [col, row], i.e., [x, y]
+- [ ] Add demo with freighters going different dirs in each row...
 - [x] Allow offsets for positioning; finish positioning options
+- [x] Change speed while game is running
 - [ ] Allow adding more than one shape?
 - [ ] Random shape selection with auto-chaining of games
-- [ ] Customize within-button grid size
-- [ ] Enable/disable wrapping in Conway
+- [x] Customize within-button grid size
+- [x] Enable/disable wrapping in Conway
 - [ ] Looping wipe transitions, user-selectable direction
 - [ ] 30x60 for the marquee?
-- [ ] Specify rate rather than period for update timer
+- [x] Specify rate rather than period for update timer
+- [ ] Add variables for generation and population
+- [ ] Add presets (the "main" button, settings, stats, ...)
 - [ ] Add controllable wipe speed?
 - [ ] Better shape retrieval
 - [ ] Set shape to arbitrary text
@@ -31,6 +36,8 @@ See the user [HELP.md](./companion/HELP.md) for more details...
   - [ ] Would generating a PNG image directly be more efficient?
 - [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5)
 - [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)
+
+NOTE: Currently, the game appears to have a maximum speed of 8 updates/second (125 ms) regardless of board size
 
 # Developor's Quick Start
 

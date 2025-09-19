@@ -1,5 +1,5 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, type LowresScreensaverConfig } from './config.js'
+import { GetConfigFields, configSizeToArray, type LowresScreensaverConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
@@ -9,6 +9,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	config!: LowresScreensaverConfig // Setup in init()
 
 	state: GameController
+	buttonGrid = [10, 11] //just a placeholder
 	boardSize = [10, 11] //just a placeholder
 
 	constructor(internal: unknown) {
@@ -35,22 +36,60 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		console.log(`Updating config. Board Size: ${config.boardSize}`)
+		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.config = config
-		const newBoardSize = config.boardSize.split(',').map((val) => Number(val))
+		this.buttonGrid = configSizeToArray(config.buttonGrid)
+		this.state.genInterval = Math.round(1000 / config.updateRate)
+		this.state.setWrap(config.wrap)
+		// board size is a bit more complicated...
+		let newBoardSize: number[]
+		if (config.boardSize === 'fit5x3') {
+			newBoardSize = [this.buttonGrid[0] * 3, this.buttonGrid[1] * 5]
+		} else if (config.boardSize === 'fit8x4') {
+			newBoardSize = [this.buttonGrid[0] * 4, this.buttonGrid[1] * 8]
+		} else {
+			newBoardSize = configSizeToArray(config.boardSize)
+		}
 		// if boardsize changed, update the Game Controller
 		if (!newBoardSize.every((val, idx) => val === this.boardSize[idx])) {
 			this.boardSize = newBoardSize
 			this.state.setBoardSize(this.boardSize[0], this.boardSize[1])
 		}
-		this.state.genInterval = config.interval
+		// update the buttons
 		this.checkFeedbacks()
 	}
 
-	setGenerationInterval(ms: number): void {
-		const newConfig = { ...this.config, interval: ms }
+	async setButtonGridSize(size: string): Promise<void> {
+		const newConfig = { ...this.config, buttonGrid: size }
 		this.saveConfig(newConfig) // this does not trigger configUpdated
-		this.state.genInterval = newConfig.interval
+		// we may need to change the board-size too, so...
+		await this.configUpdated(newConfig)
+	}
+
+	async setBoardSize(size: string): Promise<void> {
+		const newConfig = { ...this.config, boardSize: size }
+		this.saveConfig(newConfig) // this does not trigger configUpdated
+		// we may need to change the board-size too, so...
+		await this.configUpdated(newConfig)
+	}
+
+	setGenerationRate(rate: number): void {
+		const running = this.state.isRunning()
+		const newConfig = { ...this.config, updateRate: rate }
+		this.saveConfig(newConfig) // this does not trigger configUpdated
+		this.stopGame()
+		this.state.genInterval = Math.round(1000 / newConfig.updateRate)
 		this.config = newConfig
+		if (running) {
+			this.startGame()
+		}
+	}
+
+	async setWrap(enable: boolean): Promise<void> {
+		const newConfig = { ...this.config, wrap: enable }
+		this.saveConfig(newConfig) // this does not trigger configUpdated
+		// we may need to change the board-size too, so...
+		await this.configUpdated(newConfig)
 	}
 
 	// Return config fields for web config
@@ -68,6 +107,14 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	updateVariableDefinitions(): void {
 		UpdateVariableDefinitions(this)
+	}
+
+	startGame(): void {
+		this.state.start((_controller) => this.checkFeedbacks())
+	}
+
+	stopGame(): void {
+		this.state.stop()
 	}
 }
 

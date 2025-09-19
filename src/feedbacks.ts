@@ -3,7 +3,6 @@ import type { LowresScreensaverInstance } from './main.js'
 
 export const on = '⬛'
 export const off = '⬜'
-export const buttonSize = { rows: 10, cols: 11 } // rows, columns within a button.
 
 export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 	self.setFeedbackDefinitions({
@@ -63,7 +62,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 			callback: async (_feedback, context) => {
 				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				const { rows: hButton, cols: wButton } = buttonSize
+				const [hButton, wButton] = self.buttonGrid
 				const span = { x: controlX * wButton, y: controlY * hButton, w: wButton, h: hButton }
 				return {
 					color: combineRgb(146, 146, 146),

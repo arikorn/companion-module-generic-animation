@@ -94,8 +94,8 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
 				const midBoard = { y: Math.round(self.boardSize.y / 2), x: Math.round(self.boardSize.x / 2) }
 				const midShape = {
-					x: Math.round((shapeExt[1].x - shapeExt[0].x) / 2),
-					y: Math.round((shapeExt[1].y - shapeExt[0].y) / 2),
+					x: Math.round((shapeExt[1].x + shapeExt[0].x) / 2),
+					y: Math.round((shapeExt[1].y + shapeExt[0].y) / 2),
 				}
 				let offset: Coord = { x: 0, y: 0 }
 				switch (position) {

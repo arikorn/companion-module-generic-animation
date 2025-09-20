@@ -1,20 +1,21 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, configSizeToArray, type LowresScreensaverConfig } from './config.js'
+import { GetConfigFields, configSizeToCoord, type LowresScreensaverConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GameController } from './internal/controller.js'
+import { Coord } from './internal/grid.js'
 export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
 	config!: LowresScreensaverConfig // Setup in init()
 
 	state: GameController
-	buttonGrid = [10, 11] //just a placeholder
-	boardSize = [10, 11] //just a placeholder
+	buttonGrid: Coord = { x: 11, y: 10 } //just a placeholder
+	boardSize: Coord = { x: 11, y: 10 } //just a placeholder
 
 	constructor(internal: unknown) {
 		super(internal)
-		this.state = new GameController(this.boardSize[0], this.boardSize[1])
+		this.state = new GameController(this.boardSize)
 	}
 
 	async init(config: LowresScreensaverConfig): Promise<void> {
@@ -38,22 +39,22 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.config = config
-		this.buttonGrid = configSizeToArray(config.buttonGrid)
+		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.state.genInterval = Math.round(1000 / config.updateRate)
 		this.state.setWrap(config.wrap)
 		// board size is a bit more complicated...
-		let newBoardSize: number[]
+		let newBoardSize: Coord
 		if (config.boardSize === 'fit5x3') {
-			newBoardSize = [this.buttonGrid[0] * 3, this.buttonGrid[1] * 5]
+			newBoardSize = { x: this.buttonGrid.x * 5, y: this.buttonGrid.y * 3 }
 		} else if (config.boardSize === 'fit8x4') {
-			newBoardSize = [this.buttonGrid[0] * 4, this.buttonGrid[1] * 8]
+			newBoardSize = { x: this.buttonGrid.x * 8, y: this.buttonGrid.y * 4 }
 		} else {
-			newBoardSize = configSizeToArray(config.boardSize)
+			newBoardSize = configSizeToCoord(config.boardSize)
 		}
 		// if boardsize changed, update the Game Controller
-		if (!newBoardSize.every((val, idx) => val === this.boardSize[idx])) {
+		if (newBoardSize.x !== this.boardSize.x || newBoardSize.y !== this.boardSize.y) {
 			this.boardSize = newBoardSize
-			this.state.setBoardSize(this.boardSize[0], this.boardSize[1])
+			this.state.setBoardSize(newBoardSize)
 		}
 		// update the buttons
 		this.checkFeedbacks()

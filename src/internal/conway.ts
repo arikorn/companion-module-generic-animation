@@ -1,4 +1,4 @@
-import { Grid, plus } from './grid.js'
+import { Coord, Grid, plus } from './grid.js'
 
 interface GoL_State {
 	board: Grid
@@ -15,8 +15,8 @@ export class GameOfLife {
 	past: GoL_State[] = []
 	start: Grid
 
-	constructor(nrows: number, ncols: number) {
-		const newBoard = new Grid(nrows, ncols, 0)
+	constructor(size: Coord) {
+		const newBoard = new Grid(size, 0)
 		this.present = newBoard
 		this.start = newBoard
 		this.nAlive = 0
@@ -53,7 +53,7 @@ export class GameOfLife {
 
 	clear(): void {
 		this.clearHistory()
-		this.present = new Grid(this.present.nrow(), this.present.ncol(), 0)
+		this.present = new Grid(this.present.dims(), 0)
 		this.nAlive = 0
 		//clear start?
 	}
@@ -81,9 +81,10 @@ export class GameOfLife {
 
 		const source = this.present
 		const rows = source.nrow()
-		const nextgen = new Grid(rows, source.ncol(), 0)
+		const nextgen = new Grid(source.dims(), 0)
 		const neighbors = nextgen.copy()
 
+		// TODO: Use some way that doesn't depend on internal representation?
 		// compute neighbor values efficiently: for each "live" cell, increment all of its neighbors
 		for (let row = 0; row < rows; row++) {
 			const rowArray = source.getRow(row)

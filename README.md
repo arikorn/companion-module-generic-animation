@@ -25,11 +25,13 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [ ] 30x60 for the marquee?
 - [x] Specify rate rather than period for update timer
 - [ ] Add variables for generation and population
-- [ ] Add presets (the "main" button, settings, stats, ...)
+- [ ] Add presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Add controllable wipe speed?
 - [ ] Better shape retrieval
 - [ ] Set shape to arbitrary text
+- [ ] Animation: set a variable with animation status (on/off) for triggers
 - [ ] Possibly, smart placement of text???
+- [ ] Shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] Possible efficiency improvements:
   - [ ] Don't recalculate button position each time (may use subscribe)
   - [ ] Specify the font size explicitly

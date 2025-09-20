@@ -1,9 +1,9 @@
 import type { LowresScreensaverInstance } from './main.js'
-import { Grid } from './internal/grid.js'
+import { Coord, Grid } from './internal/grid.js'
 import { shapes, getShapeExtent /*, shapesByCategory*/ } from './internal/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault } from './config.js'
 
-function makeChoices(strMap: Map<string, number[][]>): any {
+function makeChoices(strMap: Map<string, Coord[]>): any {
 	return Array.from(strMap.keys()).map((val) => ({ id: val, label: val }))
 }
 
@@ -68,8 +68,8 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					type: 'number',
 					label: 'X offset',
 					default: 0,
-					min: -self.boardSize[1],
-					max: self.boardSize[1],
+					min: -self.boardSize.x,
+					max: self.boardSize.x,
 					range: true,
 					tooltip: 'Enter an X (columns) offset to the placement.',
 				},
@@ -78,51 +78,53 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					type: 'number',
 					label: 'y offset',
 					default: 0,
-					min: -self.boardSize[0],
-					max: self.boardSize[0],
+					min: -self.boardSize.y,
+					max: self.boardSize.y,
 					range: true,
 					tooltip: 'Enter a Y (rows) offset to the placement.',
 				},
 			],
 			callback: async (event) => {
-				const newBoard = new Grid(self.boardSize[0], self.boardSize[1])
+				const newBoard = new Grid(self.boardSize)
 				const shapeName = event.options.shape
 				const position = event.options.pos
 				const userXOffset = Number(event.options.xOffset)
 				const userYOffset = Number(event.options.yOffset)
 				const theShape = shapes.get(shapeName)
-				const shapeExt = getShapeExtent(theShape)
-				const midBoard = [Math.round(self.boardSize[0] / 2), Math.round(self.boardSize[1] / 2)]
-				const midShape = [Math.round((shapeExt[1] - shapeExt[0]) / 2), Math.round((shapeExt[3] - shapeExt[2]) / 2)]
-				let offset = [0, 0, 0, 0]
-
+				const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
+				const midBoard = { y: Math.round(self.boardSize.y / 2), x: Math.round(self.boardSize.x / 2) }
+				const midShape = {
+					x: Math.round((shapeExt[1].x - shapeExt[0].x) / 2),
+					y: Math.round((shapeExt[1].y - shapeExt[0].y) / 2),
+				}
+				let offset: Coord = { x: 0, y: 0 }
 				switch (position) {
 					case 'center': {
-						offset = [midBoard[0] - midShape[0], midBoard[1] - midShape[1]]
+						offset = { x: midBoard.x - midShape.x, y: midBoard.y - midShape.y }
 						break
 					}
 					case 'top-center': {
-						offset = [0 - shapeExt[0], midBoard[1] - midShape[1]]
+						offset = { y: 0 - shapeExt[0].y, x: midBoard.x - midShape.x }
 						break
 					}
 					case 'center-left': {
-						offset = [midBoard[0] - midShape[0], 0 - shapeExt[2]]
+						offset = { y: midBoard.y - midShape.y, x: 0 - shapeExt[0].x }
 						break
 					}
 					case 'bottom-center': {
-						offset = [self.boardSize[0] - (shapeExt[1] - shapeExt[0]) - 1, midBoard[1] - midShape[1]]
+						offset = { y: self.boardSize.y - (shapeExt[1].y - shapeExt[0].y) - 1, x: midBoard.x - midShape.x }
 						break
 					}
 					case 'center-right': {
-						offset = [midBoard[0] - midShape[0], self.boardSize[1] - (shapeExt[3] - shapeExt[2]) - 1]
+						offset = { y: midBoard.y - midShape.y, x: self.boardSize.x - (shapeExt[1].x - shapeExt[0].x) - 1 }
 						break
 					}
 				}
 				if (!isNaN(userXOffset)) {
-					offset[1] += userXOffset
+					offset.x += userXOffset
 				}
 				if (!isNaN(userYOffset)) {
-					offset[0] += userYOffset
+					offset.y += userYOffset
 				}
 				newBoard.setShape(theShape, false, offset)
 				self.state.stop()

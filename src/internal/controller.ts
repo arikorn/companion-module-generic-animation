@@ -1,5 +1,5 @@
 import { WipeEffect } from './wipeEffect.js'
-import { Grid, Wipe } from './grid.js'
+import { Coord, Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
 import { shapes } from './shapes.js' //shapesByCategory, transpose
 
@@ -20,8 +20,8 @@ export class GameController {
 	// game-over extension:
 	extraRounds = 0
 
-	constructor(nrow: number, ncol: number) {
-		this.theGame = new GameOfLife(nrow, ncol)
+	constructor(size: Coord) {
+		this.theGame = new GameOfLife(size)
 		//this.board = this.theGame.present
 		this.running = null
 	}
@@ -85,23 +85,23 @@ export class GameController {
 
 	// ============ CONFIGS ==================
 	// **** Board Size ****
-	setBoardSize(nrow: number, ncol: number): void {
-		if (this.theGame.nrow() !== nrow || this.theGame.ncol() !== ncol) {
+	setBoardSize(size: Coord): void {
+		if (this.theGame.nrow() !== size.y || this.theGame.ncol() !== size.x) {
 			this.stop()
-			const newBoard = new Grid(nrow, ncol, 0)
+			const newBoard = new Grid(size, 0)
 			this.theGame.clear()
 			this.theGame.setBoard(newBoard)
 		}
 	}
 
 	//  **** Add Shape ****
-	addShape(shape: string, row = 0, col = 0): void {
+	addShape(shape: string, topLeft: Coord): void {
 		// later we can center... and/or add transforms
 		const newBoard = this.theGame.present.copy()
 		//console.log(`Clicked ${JSON.stringify(idx)}!`);
 		const toggle = shape === 'point'
 		const newShape = shapes.get(shape)
-		newBoard.setShape(newShape, toggle, [col, row])
+		newBoard.setShape(newShape, toggle, topLeft)
 		this.updateBoard(newBoard)
 		//console.log(`fill: ${board}; newFill: ${newBoard}`);
 	}

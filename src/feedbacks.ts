@@ -78,8 +78,8 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 			callback: async (_feedback, context) => {
 				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				const [hButton, wButton] = self.buttonGrid
-				const span = { x: controlX * wButton, y: controlY * hButton, w: wButton, h: hButton }
+				const { y: bHeight, x: bWidth } = self.buttonGrid
+				const span = { x: controlX * bWidth, y: controlY * bHeight, w: bWidth, h: bHeight }
 				return {
 					color: combineRgb(146, 146, 146),
 					bgcolor: combineRgb(0, 0, 0),

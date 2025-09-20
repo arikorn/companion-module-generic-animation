@@ -3,6 +3,7 @@
 export interface Coord {
 	x: number
 	y: number
+	val?: number
 }
 
 export interface Span {
@@ -31,7 +32,8 @@ export const max: BinaryFn = (a, b) => Math.max(a, b)
 export class Grid extends Array<Array<number>> {
 	//data: number[][]
 
-	constructor(nrow: number, ncol: number, initval: number = 0) {
+	constructor(size: Coord, initval: number = 0) {
+		const { y: nrow, x: ncol } = size
 		super(nrow)
 		for (let r = 0; r < nrow; r++) {
 			this[r] = new Array(ncol).fill(initval)
@@ -40,11 +42,15 @@ export class Grid extends Array<Array<number>> {
 
 	copy(): Grid {
 		const n = this.nrow()
-		const result = new Grid(this.nrow(), 0) // just need an empty object
+		const result = new Grid({ y: this.nrow(), x: 0 }) // just need an empty object
 		for (let r = 0; r < n; r++) {
 			result[r] = this[r].slice()
 		}
 		return result
+	}
+
+	dims(): Coord {
+		return { y: this.nrow(), x: this.ncol() }
 	}
 
 	nrow(): number {
@@ -147,56 +153,57 @@ export class Grid extends Array<Array<number>> {
 	}
 
 	// note: toggle is not generalized: it will set the value to 0 or val (or 1 if val is missing)
-	//  coordinates are expressed as a nested array [[row1,col1,val1?], [row2,col2,val2?], ...]
-	//   "val" is optional and defaults to 1
-	setShape(coords: number[][], toggle = false, offset = [0, 0]): void {
+	//  coordinates are expressed as a nested array:
+	//         [[row1,col1,val1?], [row2,col2,val2?], ...]  "val" is optional and defaults to 1
+	setShape(coords: Coord[], toggle = false, offset = { x: 0, y: 0 }): void {
 		coords.forEach((coord) => {
-			let row = coord[0] + offset[0]
-			let col = coord[1] + offset[1]
-			const val = coord.length > 2 ? coord[2] : 1
-			while (row + 1 > this.nrow()) {
+			let x = coord.x + offset.x
+			let y = coord.y + offset.y
+			const val = coord.val ?? 1
+			while (y + 1 > this.nrow()) {
 				// wrap values
-				row -= this.nrow()
+				y -= this.nrow()
 			}
-			while (row < 0) {
+			while (y < 0) {
 				// wrap values
-				row += this.nrow()
+				y += this.nrow()
 			}
-			while (col + 1 > this.ncol()) {
-				col -= this.ncol()
+			while (x + 1 > this.ncol()) {
+				x -= this.ncol()
 			}
-			while (col < 0) {
-				col += this.ncol()
+			while (x < 0) {
+				x += this.ncol()
 			}
-			this[row][col] = toggle ? Number(!this[row][col]) * val : val
+			this[y][x] = toggle ? Number(!this[y][x]) * val : val
 		})
 	}
 
-	getShape(simplify = true): number[][] {
+	getShape(simplify = true): Coord[] {
 		let result = []
 		for (let r = 0; r < this.length; r++) {
 			const row = this[r]
 			for (let c = 0; c < row.length; c++) {
-				if (row[c] > 0) result.push([r, c])
+				if (row[c] > 0) result.push({ x: c, y: r })
 			}
 		}
 		if (simplify && result.length > 0) {
-			const coord_min = result.reduce((gmin, val) => [Math.min(gmin[0], val[0]), Math.min(gmin[1], val[1])], result[0])
-			result = result.map((val) => [val[0] - coord_min[0], val[1] - coord_min[1]])
+			const coord_min = result.reduce(
+				(gmin, val) => ({ x: Math.min(gmin.x, val.x), y: Math.min(gmin.y, val.y) }),
+				result[0],
+			)
+			result = result.map((val) => ({ x: val.x - coord_min.x, y: val.y - coord_min.y }))
 		}
 		return result
 	}
 
-	reduceAll(op: (a: number, b: number) => number): number {
-		// for some reason, a nested reduce didn't work...
-		//const level1 = this.present.map(val => val.reduce((rowTotal, cellVal)=> rowTotal + cellVal, 0))
+	reduceAll(op: (a: number, b: number) => number, initval = 0): number {
 		return this.reduce(
 			(total, rowArray) =>
 				op(
 					total,
 					rowArray.reduce((rowTotal, cellVal) => op(rowTotal, cellVal), 0),
 				),
-			0,
+			initval,
 		)
 	}
 

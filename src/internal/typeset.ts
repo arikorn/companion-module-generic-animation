@@ -1,5 +1,6 @@
 const letters = new Map()
 
+// Returns a row-wise bitmap array [ [b00, b10, b20, ...], [b10, b11, ...], ...]
 export function typeset(text: string): number[][] {
 	let result: Array<Array<number>> = Array.from({ length: 5 }, () => [])
 	let line = 0

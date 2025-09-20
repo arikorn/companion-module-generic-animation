@@ -762,6 +762,12 @@ setWithCategory(
 	]),
 )
 
+setWithCategory('freighter x 3', 'continuous', [
+	...shiftxy(shapes.get('freighter'), { y: -11, x: 10 }),
+	...hmirror(shapes.get('freighter')),
+	...shiftxy(shapes.get('freighter'), { y: 11, x: -10 }),
+])
+
 setWithCategory('Herschel climber', 'long-lived', [
 	//1429 on 40row, 1535 on 30row
 	...coordsFromArray([

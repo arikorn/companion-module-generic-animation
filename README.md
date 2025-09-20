@@ -12,13 +12,16 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 
 # TO DO:
 
-- [ ] Change [row,col] to the more standard [col, row], i.e., [x, y]
-- [ ] Add demo with freighters going different dirs in each row...
-- [ ] Configurable background shape (blank vs. grid, maybe dimmer grid)
+- [ ] Note apparent bug in Companion 4.1 (or others?) - CPU goes up to 70% after recompile dev module
+- [ ] Bug in companion-module/base - can't debug starting with 1.12. (9-20: Julian says he fixed it!)
+- [x] Change [row,col] to the more standard [col, row], i.e., [x, y]
+- [x] Add demo with freighters going different dirs in each row...
+- [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
 - [ ] Allow adding more than one shape?
 - [ ] Random shape selection with auto-chaining of games
+- [ ] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
 - [ ] Looping wipe transitions, user-selectable direction
@@ -31,7 +34,7 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [ ] Set shape to arbitrary text
 - [ ] Animation: set a variable with animation status (on/off) for triggers
 - [ ] Possibly, smart placement of text???
-- [ ] Shape transforms? (Also: implement rotate() function in shapes.ts)
+- [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] Possible efficiency improvements:
   - [ ] Don't recalculate button position each time (may use subscribe)
   - [ ] Specify the font size explicitly

@@ -7,14 +7,16 @@ export interface LowresScreensaverConfig {
 	boardSize: string
 	updateRate: number
 	wrap: boolean
+	onOffChars: string // two (or three?) character representing on, off, (and no-cell)
 }
 
 // columns, rows
 const boardSizes = [
 	[55, 30],
 	[11, 10],
-	[60, 30],
+	[60, 30], // special case for the marquee
 	[88, 40],
+	[90, 40], // special case for the marquee
 ]
 
 // columns, rows within a button.
@@ -23,8 +25,41 @@ const buttonSizes = [
 	[10, 9],
 	[9, 8],
 	[8, 7],
-	[7, 6],
+	[7, 6], // both 6-row options are about the same...
+	[6, 6], // as good as 7x6
+	[5, 5], // note depending on the "off" glyph this looks wrong, but it's right for the "on" glyph, which is what counts
+	[4, 4], // the rest are here for completeness, not sure I'd recommend
+	[3, 3],
+	[2, 2],
+	[1, 1],
 ]
+
+// characters for "live" and "dead" cells:
+export const cellCharChoices = [
+	{ id: '\u2589⬜', label: '\u2589, ⬜: recommended: "on" is largest' },
+	{ id: '⬛⬜', label: '⬛, ⬜: exact size-match but "on" is smaller' },
+	{ id: '\u2589⬚', label: '\u2589, ⬚: dimmer background' },
+	{ id: '\u2589\u3164', label: '\u2589, \u3164: no grid: best for 1-6 rows per button' },
+]
+
+// const on = '\u2589' //'⯀' = \u2BC0  matches the blanks but is small //'⬛' \u2B1B ?
+// const off = '⬜' //'\u115F' //'⬚'
+// candidates for on
+//'⬛' \u2B1B ? - from noto symbol 2 Geometric shapes - symbols and emoji
+// '\u2588' - "full block" but not square (too tall)
+// '\u2587' - "lower 7/8 block" is square but slightly too big..
+// '\u2589' - "left 7/8 block" is just right!
+// '\u25A0' is tiny!
+
+// candidates for off:
+// braille blank: '\u2800' - too narrow
+// '\u115F' HANGUL CHOSEONG FILLER -- pretty close, but this one causes Companion to choke!
+// U+1160 HANGUL JUNGSEONG FILLER -- same
+// '\u3164' HANGUL FILLER - same size, but Companion handles it as efficiently as the other characters.
+// '⬚' --similar to above and good compromise with complete blank
+// '⬜' -- \u2B1C, a perfect match for 2B1B or 2589, but brightest BG. Sanme Noto Symbol 2 group.
+// various others either aren't blank or are zero-width such as '\ufffc' '\uE002F' '\u2000' series (en quad, en space, etc.)
+//  right-t-left mark: '\u200F' has zero width
 
 export function configSizeToCoord(size: string): Coord {
 	const sizeArr = size.split(',').map((val) => Number(val))
@@ -83,9 +118,19 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			default: 5,
 		},
 		{
+			type: 'dropdown',
+			id: 'onOffChars',
+			label: 'ADVANCED: Glyphs for "on" and "off" -- see the help',
+			tooltip:
+				'Specify the pair of characters to represent cells that are, respectively, "on" (live) and "off" (dead).\nNote that the colors are reversed here and the relative scales are misleading',
+			width: 12,
+			choices: cellCharChoices,
+			default: cellCharChoices[0].id,
+		},
+		{
 			type: 'checkbox',
 			id: 'wrap',
-			label: 'Wrap the grid so edges continue on the opposite side',
+			label: 'ADVANCED: Wrap the grid so edges continue on the opposite side',
 			tooltip: 'Generally, leaving "wrap" on is more interesting.',
 			width: 8,
 			default: true,

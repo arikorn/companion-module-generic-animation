@@ -1,5 +1,5 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, configSizeToCoord, type LowresScreensaverConfig } from './config.js'
+import { GetConfigFields, cellCharChoices, configSizeToCoord, type LowresScreensaverConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
@@ -10,8 +10,10 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	config!: LowresScreensaverConfig // Setup in init()
 
 	state: GameController
-	buttonGrid: Coord = { x: 11, y: 10 } //just a placeholder
-	boardSize: Coord = { x: 11, y: 10 } //just a placeholder
+	buttonGrid: Coord = { x: 11, y: 10 } // value is just a placeholder
+	boardSize: Coord = { x: 11, y: 10 } // value is just a placeholder
+	on: string = cellCharChoices[0].id[0] // character representing "live" cells
+	off: string = cellCharChoices[0].id[1] // character representing "dead" cells
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -38,10 +40,17 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
-		this.config = config
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.state.genInterval = Math.round(1000 / config.updateRate)
+		if (!('onOffChars' in config)) {
+			// needed only for development, the first time the props were added
+			config = { ...(config as LowresScreensaverConfig), onOffChars: this.on + this.off }
+			this.saveConfig(config)
+		}
+		this.on = config.onOffChars[0]
+		this.off = config.onOffChars[1]
 		this.state.setWrap(config.wrap)
+		this.config = config
 		// board size is a bit more complicated...
 		let newBoardSize: Coord
 		if (config.boardSize === 'fit5x3') {
@@ -83,6 +92,17 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.config = newConfig
 		if (running) {
 			this.startGame()
+		}
+	}
+
+	setOnfOffChars(onOffChars: string): void {
+		if (this.config.onOffChars !== onOffChars) {
+			this.on = onOffChars[0]
+			this.off = onOffChars[1]
+			this.config.onOffChars = onOffChars
+			this.saveConfig(this.config)
+			// update the buttons
+			this.checkFeedbacks()
 		}
 	}
 

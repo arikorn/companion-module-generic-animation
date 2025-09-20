@@ -1,7 +1,7 @@
 import type { LowresScreensaverInstance } from './main.js'
 import { Coord, Grid } from './internal/grid.js'
 import { shapes, getShapeExtent /*, shapesByCategory*/ } from './internal/shapes.js'
-import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault } from './config.js'
+import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 
 function makeChoices(strMap: Map<string, Coord[]>): any {
 	return Array.from(strMap.keys()).map((val) => ({ id: val, label: val }))
@@ -160,7 +160,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					label: 'Game Board Grid Size',
 					choices: boardSizeChoices(),
 					default: boardSizeDefault(),
-					tooltip: 'Choose the grid-size within each button.',
+					tooltip: 'Choose the size of the full grid.',
 				},
 			],
 			callback: async (event) => {
@@ -189,6 +189,26 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				if (!isNaN(rate)) {
 					// enforce the range
 					self.setGenerationRate(Math.max(1, Math.min(10, rate)))
+				}
+			},
+		},
+		//============================
+		setCellCharacters: {
+			name: 'Set Cell Characters',
+			options: [
+				{
+					id: 'onOffChars',
+					type: 'dropdown',
+					label: 'On/Off Character pairs',
+					choices: cellCharChoices,
+					default: cellCharChoices[0].id,
+					tooltip:
+						'Choose the character pair to represent "live" (on) and "dead" (off). Note that the colors are reversed and the relative sizes are misleading.',
+				},
+			],
+			callback: async (event) => {
+				if (event.options.onOffChars !== undefined) {
+					self.setOnfOffChars(String(event.options.onOffChars))
 				}
 			},
 		},

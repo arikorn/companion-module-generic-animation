@@ -62,7 +62,7 @@ export const cellCharChoices = [
 //  right-t-left mark: '\u200F' has zero width
 
 export function configSizeToCoord(size: string): Coord {
-	const sizeArr = size.split(',').map((val) => Number(val))
+	const sizeArr = size.split(/[x,]/).map((val) => Number(val))
 	return { x: sizeArr[0], y: sizeArr[1] }
 }
 
@@ -76,9 +76,12 @@ export function buttonSizeDefault(): DropdownChoiceId {
 
 export function boardSizeChoices(): DropdownChoice[] {
 	return [
-		{ id: 'fit5x3', label: 'fit to 5x3 surface' },
-		{ id: 'fit8x4', label: 'fit to 8x4 surface' },
-		...boardSizes.map((val) => ({ id: val.join(','), label: val.join('x') })),
+		{ id: 'fit5x3', label: 'fit to 5x3-button surface' },
+		{ id: 'fit8x4', label: 'fit to 8x4-button surface (SD XL)' },
+		{ id: 'fit4x3', label: 'fit to 4x3-button surface (SD+)' },
+		{ id: 'fit4x2', label: 'fit to 4x2-button surface (SD+ or Neo)' },
+		{ id: 'fit3x2', label: 'fit to 3x2-button surface (SD mini)' },
+		...boardSizes.map((val) => ({ id: val.join('x'), label: val.join('x') })),
 	]
 }
 
@@ -90,22 +93,23 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'dropdown',
-			id: 'boardSize',
-			label: 'Internal Board Size',
-			tooltip:
-				'Specify the size of the board (width x height). The board may need not all be visible, or may be smaller than the size allowed by the surface.',
-			width: 12,
-			choices: boardSizeChoices(),
-			default: boardSizeDefault(),
-		},
-		{
-			type: 'dropdown',
 			id: 'buttonGrid',
 			label: 'Grid Size INSIDE each button',
 			tooltip: 'Specify the size of the subgrid (width x height) shown on a button.',
 			width: 12,
 			choices: buttonSizeChoices(),
 			default: buttonSizeDefault(),
+		},
+		{
+			type: 'dropdown',
+			id: 'boardSize',
+			label: 'Total Board Size',
+			tooltip:
+				'Specify the size of the button grid ("fit to WxH") or the number of cells in the board (width x height). The board may be larger or smaller than the size allowed by the number of buttons times the button-grid size.',
+			width: 12,
+			choices: boardSizeChoices(),
+			default: boardSizeDefault(),
+			allowCustom: true,
 		},
 		{
 			type: 'number',
@@ -130,8 +134,9 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'checkbox',
 			id: 'wrap',
-			label: 'ADVANCED: Wrap the grid so edges continue on the opposite side',
-			tooltip: 'Generally, leaving "wrap" on is more interesting.',
+			label: 'ADVANCED: Wrap the grid edges',
+			tooltip:
+				'If "on", the board continues on the opposite sides. Generally, leaving "wrap" on is more interesting, except for very small boards (like 5x3).',
 			width: 8,
 			default: true,
 		},

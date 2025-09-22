@@ -152,7 +152,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setGridSize: {
-			name: 'Set Board Grid Size',
+			name: 'Set Full-Board Grid Size',
 			options: [
 				{
 					id: 'size',
@@ -160,6 +160,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					label: 'Game Board Grid Size',
 					choices: boardSizeChoices(),
 					default: boardSizeDefault(),
+					allowCustom: true,
 					tooltip: 'Choose the size of the full grid.',
 				},
 			],

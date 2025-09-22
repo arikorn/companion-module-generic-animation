@@ -53,15 +53,17 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.config = config
 		// board size is a bit more complicated...
 		let newBoardSize: Coord
-		if (config.boardSize === 'fit5x3') {
-			newBoardSize = { x: this.buttonGrid.x * 5, y: this.buttonGrid.y * 3 }
-		} else if (config.boardSize === 'fit8x4') {
-			newBoardSize = { x: this.buttonGrid.x * 8, y: this.buttonGrid.y * 4 }
+		if (config.boardSize.includes('fit')) {
+			// 'fit5x3', for example:
+			const dims = configSizeToCoord(config.boardSize.replace('fit', ''))
+			newBoardSize = { x: this.buttonGrid.x * dims.x, y: this.buttonGrid.y * dims.y }
 		} else {
 			newBoardSize = configSizeToCoord(config.boardSize)
 		}
 		// if boardsize changed, update the Game Controller
-		if (newBoardSize.x !== this.boardSize.x || newBoardSize.y !== this.boardSize.y) {
+		const newSizeIsValid = !(isNaN(newBoardSize.x) || isNaN(newBoardSize.y))
+		const newSizeChanged = newBoardSize.x !== this.boardSize.x || newBoardSize.y !== this.boardSize.y
+		if (newSizeIsValid && newSizeChanged) {
 			this.boardSize = newBoardSize
 			this.state.setBoardSize(newBoardSize)
 		}

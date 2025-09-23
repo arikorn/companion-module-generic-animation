@@ -13,27 +13,27 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 # TO DO:
 
 - [ ] Note apparent bug in Companion 4.1 (or others?) - CPU goes up to 70% after recompile dev module
-- [ ] Bug in companion-module/base - can't debug starting with 1.12. (9-20: Julian says he fixed it!)
+- [x] Bug in companion-module/base - can't debug starting with 1.12. (9-20: Julian says he fixed it!)
 - [x] Change [row,col] to the more standard [col, row], i.e., [x, y]
 - [x] Add demo with freighters going different dirs in each row...
 - [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
 - [ ] Allow adding more than one shape?
+- [ ] Organize shapes, both internally and for the user.
+- [ ] Set shape to arbitrary text
+- [ ] Possibly, smart placement of text???
 - [ ] Random shape selection with auto-chaining of games
-- [ ] Fix up prettier's mangling of shapes.ts? (or convert to...?)
+- [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
 - [ ] Looping wipe transitions, user-selectable direction
-- [ ] 30x60 for the marquee?
+- [x] Add 60x30 marquee?
 - [x] Specify rate rather than period for update timer
-- [ ] Add variables for generation and population
+- [ ] Add variables for generation and population (and running? and board size???)
+- [ ] Animation: set a variable with animation status (on/off) for triggers
 - [ ] Add presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Add controllable wipe speed?
-- [ ] Better shape retrieval
-- [ ] Set shape to arbitrary text
-- [ ] Animation: set a variable with animation status (on/off) for triggers
-- [ ] Possibly, smart placement of text???
 - [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] Possible efficiency improvements:
   - [ ] Don't recalculate button position each time (may use subscribe)
@@ -44,6 +44,7 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)
 
 NOTE: Currently, the game appears to have a maximum speed of 8 updates/second (125 ms) regardless of board size
+(An easy way to measure is with the "freighter" which travels at c/2.)
 
 # Developor's Quick Start
 

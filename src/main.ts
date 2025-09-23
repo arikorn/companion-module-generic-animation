@@ -1,6 +1,6 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
 import { GetConfigFields, cellCharChoices, configSizeToCoord, type LowresScreensaverConfig } from './config.js'
-import { UpdateVariableDefinitions } from './variables.js'
+import { UpdateVariableDefinitions, updateVariableValues } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
@@ -28,7 +28,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.updateActions() // export actions
 		this.updateFeedbacks() // export feedbacks
 		this.updateVariableDefinitions() // export variable definitions
-		this.checkFeedbacks() // not sure if it's necessary after updating variables...
+		this.updateEfffects() // not sure if it's necessary after updating variables...
 	}
 
 	// When module gets deleted
@@ -66,9 +66,10 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		if (newSizeIsValid && newSizeChanged) {
 			this.boardSize = newBoardSize
 			this.state.setBoardSize(newBoardSize)
+			this.state.resetBoard(() => {}, false) // don't need a callback since we call updateEffects next
 		}
 		// update the buttons
-		this.checkFeedbacks()
+		this.updateEfffects()
 	}
 
 	async setButtonGridSize(size: string): Promise<void> {
@@ -104,7 +105,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 			this.config.onOffChars = onOffChars
 			this.saveConfig(this.config)
 			// update the buttons
-			this.checkFeedbacks()
+			this.updateEfffects()
 		}
 	}
 
@@ -132,12 +133,18 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		UpdateVariableDefinitions(this)
 	}
 
+	updateEfffects(): void {
+		this.checkFeedbacks()
+		updateVariableValues(this)
+	}
+
 	startGame(): void {
-		this.state.start((_controller) => this.checkFeedbacks())
+		this.state.start((_controller) => this.updateEfffects())
 	}
 
 	stopGame(): void {
 		this.state.stop()
+		this.updateEfffects()
 	}
 }
 

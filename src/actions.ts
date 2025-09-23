@@ -128,7 +128,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				}
 				newBoard.setShape(theShape, false, offset)
 				self.state.stop()
-				self.state.replaceBoard(newBoard, () => self.checkFeedbacks())
+				self.state.replaceBoard(newBoard, () => self.updateEfffects())
 			},
 		},
 		//============================

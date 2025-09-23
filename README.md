@@ -19,22 +19,26 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
+- [ ] Allow user to specify an offset for button position relative to the internal grid
 - [ ] Allow adding more than one shape?
 - [ ] Organize shapes, both internally and for the user.
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
-- [ ] Random shape selection with auto-chaining of games
+- [ ] Random shape selection
+- [ ] Auto-chaining of games
 - [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
 - [ ] Looping wipe transitions, user-selectable direction
 - [x] Add 60x30 marquee?
 - [x] Specify rate rather than period for update timer
-- [ ] Add variables for generation and population (and running? and board size???)
-- [ ] Animation: set a variable with animation status (on/off) for triggers
+- [x] Add variables for generation and population (and running and board size)
+- [x] Animation: set a variable with animation status (on/off) for triggers
+- [x] Add feedbacks for running, transitioning (wiping)
 - [ ] Add presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Add controllable wipe speed?
 - [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
+- [ ] User-specified shapes? and allow user to save current shape.
 - [ ] Possible efficiency improvements:
   - [ ] Don't recalculate button position each time (may use subscribe)
   - [ ] Specify the font size explicitly

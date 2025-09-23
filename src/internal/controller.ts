@@ -38,6 +38,14 @@ export class GameController {
 		return this.running !== null
 	}
 
+	getGeneration(): number {
+		return this.generation
+	}
+
+	getPopulation(): number {
+		return this.theGame.nAlive
+	}
+
 	// the generational callback and timer start/stop/step functions
 	nextRound(): void {
 		//this.board =
@@ -110,24 +118,46 @@ export class GameController {
 		this.theGame.setBoard(newBoard)
 	}
 
+	// **** TRANSITION ACTIONS: REPLACE, RESET, CLEAR
+	wiper: WipeEffect | null = null
+
+	wiperCallback(callback: () => void): void {
+		if (this.wiper !== null && !this.wiper.isRunning()) {
+			this.wiper = null
+		}
+		callback()
+	}
+
+	isWiping(): boolean {
+		return this.wiper !== null
+	}
+
 	// replace the current board with a new board, using a wipe effect
 	replaceBoard(fromBoard: Grid, callback: () => void): void {
 		const toBoard = this.theGame.present
 		// TODO: we don't really need to set the board, which counts the population
-		const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-		wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => callback())
+		if (this.wiper !== null) {
+			this.wiper.stop()
+		}
+		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+		this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => this.wiperCallback(callback))
 		this.generation = 0
 	}
 
 	//  **** RESET ****
 	// reset the current generation to the initial generation, using a wipe effect
-	resetBoard(callback: () => void): void {
+	resetBoard(callback: () => void, useTransition = true): void {
 		// reset the board to the most recent initial state
 		const toBoard = this.theGame.present
 		const fromBoard = this.theGame.resetBoard()
 		// TODO: we don't really need to set the board, which counts the population
-		const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-		wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => callback())
+		if (this.wiper !== null) {
+			this.wiper.stop()
+		}
+		if (useTransition) {
+			this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+			this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => this.wiperCallback(callback))
+		}
 		this.generation = 0
 	}
 
@@ -142,9 +172,12 @@ export class GameController {
 		// if instantaneous:
 		//setBoard(theGame.present)
 		// if shifting in new board:
-		const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+		if (this.wiper !== null) {
+			this.wiper.stop()
+		}
+		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
 		// Set direction to 0..3 (the default values for enum)
-		wiper.start(Math.floor(Math.random() * 4), () => callback())
+		this.wiper.start(Math.floor(Math.random() * 4), () => this.wiperCallback(callback))
 	}
 
 	//  **** WRAP Checkbox ****

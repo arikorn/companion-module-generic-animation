@@ -153,8 +153,8 @@ export class Grid extends Array<Array<number>> {
 	}
 
 	// note: toggle is not generalized: it will set the value to 0 or val (or 1 if val is missing)
-	//  coordinates are expressed as a nested array:
-	//         [[row1,col1,val1?], [row2,col2,val2?], ...]  "val" is optional and defaults to 1
+	//  coordinates are expressed as an array of Coord:
+	//         [{x:x1, y:y1, val:val1?}, {x:x2, y:y2,val:val2?}, ...]  "val" is optional and defaults to 1
 	setShape(coords: Coord[], toggle = false, offset = { x: 0, y: 0 }): void {
 		coords.forEach((coord) => {
 			let x = coord.x + offset.x

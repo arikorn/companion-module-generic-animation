@@ -1,4 +1,4 @@
-import { Coord } from './grid.js'
+import { Coord, Grid } from './grid.js'
 import { typeset } from './typeset.js'
 
 export const shapes = new Map() // should be `Map<string, Coord[]>` but it causes too many spurious errors due to possible undefined
@@ -14,8 +14,8 @@ export function setWithCategory(shapeName: string, category: string, shape: Coor
 	}
 }
 
-// return the extent of a list of points: note that it can have negative extent
-// result is [minRow, maxRow, minCol, maxCol]
+// return the extent of a list of Coords: note that it can have negative coordinate values
+// result is [{x:minCol, y:minRow}, {x:maxRow, , y:maxCol}]
 export function getShapeExtent(shape: Coord[]): Coord[] {
 	const x0 = shape[0].x
 	const y0 = shape[0].y
@@ -29,6 +29,14 @@ export function getShapeExtent(shape: Coord[]): Coord[] {
 			{ x: x0, y: y0 }, // max
 		],
 	)
+}
+
+export function shapeArrayToGrid(shape: Coord[]): Grid {
+	const [min, max] = getShapeExtent(shape)
+	const [rows, columns] = [max.y - min.y + 1, max.x - min.x + 1]
+	const result = new Grid({ y: rows, x: columns }, 0)
+	result.setShape(shape, false, { y: -min.y, x: -min.x })
+	return result
 }
 
 // shift a shape along the x axis (columns)
@@ -92,7 +100,7 @@ const block = shapeFromBitmap([
 	[1, 1],
 ])
 
-setWithCategory('point', ' point', [{ x: 0, y: 0 }]) // it's in its own category.
+setWithCategory('point', 'building-block', [{ x: 0, y: 0 }]) // it's in its own category.
 
 setWithCategory(
 	'S',

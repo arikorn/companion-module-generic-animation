@@ -1,7 +1,7 @@
 import { WipeEffect } from './wipeEffect.js'
 import { Coord, Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
-import { shapes } from './shapes.js' //shapesByCategory, transpose
+import { shapeArrayToGrid, shapes } from './shapes.js' //shapesByCategory, transpose
 
 export class GameController {
 	// the "conway" object:
@@ -116,6 +116,17 @@ export class GameController {
 
 	updateBoard(newBoard: Grid): void {
 		this.theGame.setBoard(newBoard)
+	}
+
+	// Copy the shape to clipboard?
+	// or copyBoard?  extracts the smallest bounding box of live elements
+	// a place-holder for the moment...
+	copyShape(): string {
+		const points = this.theGame.present.getShape()
+		const bitmap = shapeArrayToGrid(points)
+		return '[[' + bitmap.map((row) => row.join(', ')).join('],\n [') + ']]' //shapeFromBitmap(..)
+		// const bitmapText = //the return value, above
+		//await clipboardy.write(bitmapText);  //import clipboardy from 'clipboardy';
 	}
 
 	// **** TRANSITION ACTIONS: REPLACE, RESET, CLEAR

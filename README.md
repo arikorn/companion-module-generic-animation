@@ -19,13 +19,12 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
-- [ ] Allow user to specify an offset for button position relative to the internal grid
 - [ ] Allow adding more than one shape?
-- [ ] Organize shapes, both internally and for the user.
+- [x] Organize shapes, both internally and for the user. (probably could do better...)
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
 - [ ] Random shape selection
-- [ ] Auto-chaining of games
+- [ ] Auto-chaining of games (queue either a category or arbitrary group)
 - [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
@@ -37,15 +36,15 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Add feedbacks for running, transitioning (wiping)
 - [ ] Add presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Add controllable wipe speed?
+- [ ] Allow user to specify an offset for button position relative to the internal grid
 - [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] User-specified shapes? and allow user to save current shape.
-- [ ] Possible efficiency improvements:
-  - [ ] Don't recalculate button position each time (may use subscribe)
+- [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5) - maybe with half-tone anti-aliasing?
+- [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)- [ ] Possible efficiency improvements:
+  - [ ] Don't recalculate button position each time (may use subscribe?)
   - [ ] Specify the font size explicitly
   - [ ] Don't use Conway for wipe animation (or tell it to skip calculations...)
   - [ ] Would generating a PNG image directly be more efficient?
-- [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5) - maybe with half-tone anti-aliasing?
-- [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)
 
 NOTE: Currently, the game appears to have a maximum speed of 8 updates/second (125 ms) regardless of board size
 (An easy way to measure is with the "freighter" which travels at c/2.)

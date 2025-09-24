@@ -1,11 +1,49 @@
+import { /*CompanionOptionValues,*/ DropdownChoice, CompanionInputFieldDropdown } from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
 import { Coord, Grid } from './internal/grid.js'
-import { shapes, getShapeExtent /*, shapesByCategory*/ } from './internal/shapes.js'
+import { shapes, getShapeExtent, shapesByCategory } from './internal/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 
-function makeChoices(strMap: Map<string, Coord[]>): any {
-	return Array.from(strMap.keys()).map((val) => ({ id: val, label: val }))
+// Make the menu choices from the keys of the map.
+//  If category is specified, filter for a particular category (uses the global variable shapesByCategory)
+function makeChoicesFromMap(strMap: Map<string, any>, category: string | null = null): DropdownChoice[] {
+	const keys = Array.from(strMap.keys()).filter((val) =>
+		category === null ? true : shapesByCategory.get(category)!.includes(val),
+	)
+	return keys.sort().map((val) => ({ id: val, label: val }))
 }
+
+// make one menu for each category
+function categoryMenus(): CompanionInputFieldDropdown[] {
+	const categories = Array.from(shapesByCategory.keys())
+	return categories.map((category) => {
+		const menuChoices = makeChoicesFromMap(shapes, category)
+		return {
+			id: category,
+			type: 'dropdown',
+			label: `Select "${category}" Shape:`,
+			choices: menuChoices,
+			default: menuChoices[0].id,
+			isVisibleExpression: `$(options:category) === "${category}"`,
+		}
+	})
+}
+
+// An alternative method that could be implemented with subscribe: rewrite the shape menu whenever category changes.
+// at some point we can either convert this file to a class
+//const currentFilter = new Map<string, string>()
+
+// function myFilter(options:CompanionOptionValues, self: LowresScreensaverInstance): boolean {
+// 	const category = event.options.category as string
+// 	if (!currentFilter.has(event.id)) {
+// 		currentFilter.set(event.id, category)
+// 		self.updateActions()
+// 	} else if (currentFilter.get(event.id) !== category) {
+// 		self.updateActions()
+// 	}
+
+// 	return true
+// }
 
 export function UpdateActions(self: LowresScreensaverInstance): void {
 	self.setActionDefinitions({
@@ -44,12 +82,13 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			name: 'Add Shape',
 			options: [
 				{
-					id: 'shape',
+					id: 'category',
 					type: 'dropdown',
-					label: 'Select Shape',
-					choices: [...makeChoices(shapes)],
-					default: 'point',
+					label: 'Select Category',
+					choices: [...makeChoicesFromMap(shapesByCategory)],
+					default: 'continuous',
 				},
+				...categoryMenus(),
 				{
 					id: 'pos',
 					type: 'dropdown',
@@ -86,7 +125,11 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			],
 			callback: async (event) => {
 				const newBoard = new Grid(self.boardSize)
-				const shapeName = event.options.shape
+				const category = event.options?.category
+				const shapeName = event.options?.[category as string]
+				if (shapeName === undefined || shapeName === null) {
+					return
+				}
 				const position = event.options.pos
 				const userXOffset = Number(event.options.xOffset)
 				const userYOffset = Number(event.options.yOffset)

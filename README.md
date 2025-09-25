@@ -24,7 +24,10 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
 - [ ] Random shape selection
-- [ ] Auto-chaining of games (queue either a category or arbitrary group)
+- [x] Auto-chaining of games (queue either a category or arbitrary group)
+      -- [ ] better way with {update: (), done: ()} callbacks
+- [ ] (Put set shape on queue as well...)
+- [ ] Continuous looping of queue / randomize queue
 - [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway

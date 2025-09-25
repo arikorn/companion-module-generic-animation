@@ -1,7 +1,12 @@
-import { /*CompanionOptionValues,*/ DropdownChoice, CompanionInputFieldDropdown } from '@companion-module/base'
+import {
+	SomeCompanionActionInputField,
+	DropdownChoice,
+	CompanionInputFieldDropdown,
+	CompanionInputFieldMultiDropdown,
+} from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
-import { Coord, Grid } from './internal/grid.js'
-import { shapes, getShapeExtent, shapesByCategory } from './internal/shapes.js'
+import { Grid } from './internal/grid.js'
+import { shapes, shapesByCategory } from './internal/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 
 // Make the menu choices from the keys of the map.
@@ -14,19 +19,80 @@ function makeChoicesFromMap(strMap: Map<string, any>, category: string | null = 
 }
 
 // make one menu for each category
-function categoryMenus(): CompanionInputFieldDropdown[] {
+function categoryMenus(allowMultiple = false): CompanionInputFieldDropdown[] | CompanionInputFieldMultiDropdown[] {
 	const categories = Array.from(shapesByCategory.keys())
-	return categories.map((category) => {
-		const menuChoices = makeChoicesFromMap(shapes, category)
-		return {
-			id: category,
+	// note: TypeScript objected to `type: allowMultiple ? 'multidropdown' : 'dropdown', so this is slightly more wordy
+	if (allowMultiple) {
+		return categories.map((category) => {
+			const menuChoices = makeChoicesFromMap(shapes, category)
+			return {
+				id: category,
+				type: 'multidropdown',
+				label: `Select "${category}" Shapes:`,
+				choices: menuChoices,
+				default: menuChoices.map((val) => val.id),
+				isVisibleExpression: `$(options:category) === "${category}"`,
+			}
+		})
+	} else {
+		return categories.map((category) => {
+			const menuChoices = makeChoicesFromMap(shapes, category)
+			return {
+				id: category,
+				type: 'dropdown',
+				label: `Select "${category}" Shape:`,
+				choices: menuChoices,
+				default: menuChoices[0].id,
+				isVisibleExpression: `$(options:category) === "${category}"`,
+			}
+		})
+	}
+}
+
+function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = false): SomeCompanionActionInputField[] {
+	return [
+		{
+			id: 'category',
 			type: 'dropdown',
-			label: `Select "${category}" Shape:`,
-			choices: menuChoices,
-			default: menuChoices[0].id,
-			isVisibleExpression: `$(options:category) === "${category}"`,
-		}
-	})
+			label: 'Select Category',
+			choices: [...makeChoicesFromMap(shapesByCategory)],
+			default: 'continuous',
+		},
+		...categoryMenus(allowMultiple),
+		{
+			id: 'pos',
+			type: 'dropdown',
+			label: 'Placement',
+			choices: [
+				{ id: 'center', label: 'center' },
+				{ id: 'top-center', label: 'top' },
+				{ id: 'center-left', label: 'left' },
+				{ id: 'bottom-center', label: 'bottom' },
+				{ id: 'center-right', label: 'right' },
+			],
+			default: 'center',
+		},
+		{
+			id: 'xOffset',
+			type: 'number',
+			label: 'X offset',
+			default: 0,
+			min: -self.boardSize.x,
+			max: self.boardSize.x,
+			range: true,
+			tooltip: 'Enter an X (columns) offset to the placement.',
+		},
+		{
+			id: 'yOffset',
+			type: 'number',
+			label: 'y offset',
+			default: 0,
+			min: -self.boardSize.y,
+			max: self.boardSize.y,
+			range: true,
+			tooltip: 'Enter a Y (rows) offset to the placement.',
+		},
+	]
 }
 
 // An alternative method that could be implemented with subscribe: rewrite the shape menu whenever category changes.
@@ -80,98 +146,46 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		//============================
 		setShape: {
 			name: 'Add Shape',
-			options: [
-				{
-					id: 'category',
-					type: 'dropdown',
-					label: 'Select Category',
-					choices: [...makeChoicesFromMap(shapesByCategory)],
-					default: 'continuous',
-				},
-				...categoryMenus(),
-				{
-					id: 'pos',
-					type: 'dropdown',
-					label: 'Placement',
-					choices: [
-						{ id: 'center', label: 'center' },
-						{ id: 'top-center', label: 'top' },
-						{ id: 'center-left', label: 'left' },
-						{ id: 'bottom-center', label: 'bottom' },
-						{ id: 'center-right', label: 'right' },
-					],
-					default: 'center',
-				},
-				{
-					id: 'xOffset',
-					type: 'number',
-					label: 'X offset',
-					default: 0,
-					min: -self.boardSize.x,
-					max: self.boardSize.x,
-					range: true,
-					tooltip: 'Enter an X (columns) offset to the placement.',
-				},
-				{
-					id: 'yOffset',
-					type: 'number',
-					label: 'y offset',
-					default: 0,
-					min: -self.boardSize.y,
-					max: self.boardSize.y,
-					range: true,
-					tooltip: 'Enter a Y (rows) offset to the placement.',
-				},
-			],
+			description: 'Put a shape on the board. Note that this clears the current board and queue.',
+			options: createShapeOptions(self),
 			callback: async (event) => {
 				const newBoard = new Grid(self.boardSize)
 				const category = event.options?.category
-				const shapeName = event.options?.[category as string]
+				const shapeName = event.options?.[category as string] as string
 				if (shapeName === undefined || shapeName === null) {
 					return
 				}
-				const position = event.options.pos
-				const userXOffset = Number(event.options.xOffset)
-				const userYOffset = Number(event.options.yOffset)
-				const theShape = shapes.get(shapeName)
-				const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
-				const midBoard = { y: Math.round(self.boardSize.y / 2), x: Math.round(self.boardSize.x / 2) }
-				const midShape = {
-					x: Math.round((shapeExt[1].x + shapeExt[0].x) / 2),
-					y: Math.round((shapeExt[1].y + shapeExt[0].y) / 2),
-				}
-				let offset: Coord = { x: 0, y: 0 }
-				switch (position) {
-					case 'center': {
-						offset = { x: midBoard.x - midShape.x, y: midBoard.y - midShape.y }
-						break
-					}
-					case 'top-center': {
-						offset = { y: 0 - shapeExt[0].y, x: midBoard.x - midShape.x }
-						break
-					}
-					case 'center-left': {
-						offset = { y: midBoard.y - midShape.y, x: 0 - shapeExt[0].x }
-						break
-					}
-					case 'bottom-center': {
-						offset = { y: self.boardSize.y - (shapeExt[1].y - shapeExt[0].y) - 1, x: midBoard.x - midShape.x }
-						break
-					}
-					case 'center-right': {
-						offset = { y: midBoard.y - midShape.y, x: self.boardSize.x - (shapeExt[1].x - shapeExt[0].x) - 1 }
-						break
-					}
-				}
-				if (!isNaN(userXOffset)) {
-					offset.x += userXOffset
-				}
-				if (!isNaN(userYOffset)) {
-					offset.y += userYOffset
-				}
-				newBoard.setShape(theShape, false, offset)
+				const position = event.options.pos as string
+				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
+				//const theShape = shapes.get(shapeName)
+				self.state.setBoardToShape({ shapeName: shapeName, alignment: position, offset: offset })
 				self.state.stop()
-				self.state.replaceBoard(newBoard, () => self.updateEfffects())
+				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
+				//  and also allows other shapes to be queued without removing this shape from the board.
+				self.state.clearShapeQueue()
+				self.state.pushShapeQueue([{ shapeName: shapeName, alignment: position, offset: offset }])
+				void self.state.replaceBoard(newBoard, () => self.updateEfffects())
+			},
+		},
+		//============================
+		setShapeQueue: {
+			name: 'Queue Shapes',
+			options: createShapeOptions(self, true), // allow multiple
+			callback: async ({ options }) => {
+				if (options !== undefined && options.category !== undefined) {
+					const category = String(options.category)
+					if (options[category] !== undefined) {
+						const shapes = options[category] as string[]
+						const position = options.pos as string
+						const offset = { x: Number(options.xOffset), y: Number(options.yOffset) }
+						const elements = shapes.map((shape) => ({ shapeName: shape, alignment: position, offset: offset }))
+						const newBoard = self.state.pushShapeQueue(elements)
+						self.state.stop()
+						if (newBoard !== null) {
+							void self.state.replaceBoard(newBoard, () => self.updateEfffects())
+						}
+					}
+				}
 			},
 		},
 		//============================
@@ -233,6 +247,29 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				if (!isNaN(rate)) {
 					// enforce the range
 					self.setGenerationRate(Math.max(1, Math.min(10, rate)))
+				}
+			},
+		},
+		//============================
+		setGameDelay: {
+			name: 'Set the delay between queued games',
+			options: [
+				{
+					id: 'time',
+					type: 'number',
+					label: 'Delay (ms)',
+					default: 500,
+					min: 0,
+					max: 3000,
+					range: true,
+					tooltip: 'Enter the number of milliseconds between queued games',
+				},
+			],
+			callback: async (event) => {
+				const delay = Number(event.options.time)
+				if (!isNaN(delay)) {
+					// enforce the range
+					self.state.gameDelay = delay
 				}
 			},
 		},

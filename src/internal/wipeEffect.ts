@@ -15,6 +15,7 @@ export class WipeEffect {
 	callback: (() => void) | null = null
 	fromIdx = 0
 	shifting: NodeJS.Timeout | null = null
+	controller = new AbortController() // a place-holder
 
 	constructor(fromBoard: Grid, toBoard: Grid, setBoard: (toBoard: Grid) => void) {
 		this.fromBoard = fromBoard
@@ -22,7 +23,7 @@ export class WipeEffect {
 		this.setBoard = setBoard
 	}
 
-	start(direction: Wipe, callback: () => void, rate = 20): void {
+	async start(direction: Wipe, callback: () => void, rate = 20): Promise<void> {
 		this.stop()
 		this.shiftDir = direction
 		this.frameRate = rate
@@ -37,13 +38,29 @@ export class WipeEffect {
 			default: // Left, Up start at 0
 		}
 		this.callback = callback
-		this.shifting = setInterval(() => this.shiftOne(), this.frameRate)
+		this.controller = new AbortController()
+		const signal = this.controller.signal
+		const promise = new Promise<void>((resolve) => {
+			this.shifting = setInterval(() => this.shiftOne(), this.frameRate)
+			signal.addEventListener(
+				'abort',
+				() => {
+					this.stop()
+					resolve()
+				},
+				{ once: true },
+			)
+		})
+		return promise
 	}
 
 	stop(): void {
 		if (this.shifting !== null) {
-			clearInterval(this.shifting)
+			const interval = this.shifting
 			this.shifting = null
+			// abort will resolve the Promise, and call stop again, but it will be a noop
+			this.controller.abort()
+			clearInterval(interval)
 		}
 	}
 

@@ -37,16 +37,22 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.log('debug', 'destroy')
 	}
 
+	setRandomize(enable: boolean): void {
+		this.state.randomizeQueue = enable
+		this.saveConfig({ ...this.config, randomize: enable })
+	}
+
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.state.genInterval = Math.round(1000 / config.updateRate)
-		if (!('onOffChars' in config)) {
+		if (!('randomize' in config)) {
 			// needed only for development, the first time the props were added
-			config = { ...(config as LowresScreensaverConfig), onOffChars: this.on + this.off }
+			config = { ...(config as LowresScreensaverConfig), randomize: false }
 			this.saveConfig(config)
 		}
+		this.state.randomizeQueue = config.randomize
 		this.on = config.onOffChars[0]
 		this.off = config.onOffChars[1]
 		this.state.setWrap(config.wrap)

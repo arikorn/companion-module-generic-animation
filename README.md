@@ -19,14 +19,17 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
-- [ ] Allow adding more than one shape to a single board?
 - [x] Organize shapes, both internally and for the user. (probably could do better...)
+- [ ] Allow shapes to be in more than one category
+- [ ] Allow game-timeout so "continuous" shapes can be played in a playlist
+- [ ] Create a timeout variable/feedback for use in Triggers (for screensaver functionality)
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
-- [ ] Random shape selection
-- [x] Auto-chaining of games (queue either a category or arbitrary group) - [x] better way with {update: (), done: ()} callbacks
+- [ ] Random shape selection (i.e. user doesn't select a playlist at all)
+- [x] Auto-chaining of games (queue either a category or arbitrary group)
+  - [x] better way with {update: (), done: ()} callbacks
 - [x] (Put set shape on queue as well...)
-- [ ] Continuous looping of queue / randomize queue
+- [x] Continuous looping of queue / randomize queue
 - [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
@@ -36,13 +39,15 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Add variables for generation and population (and running and board size)
 - [x] Animation: set a variable with animation status (on/off) for triggers
 - [x] Add feedbacks for running, transitioning (wiping)
-- [ ] Add presets (the "main" button, settings, stats, ...); remove colors from feedbacks
+- [ ] Allow adding more than one shape to a single board?
+- [ ] Add Presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Add controllable wipe speed?
 - [ ] Allow user to specify an offset for button position relative to the internal grid
 - [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] User-specified shapes? and allow user to save current shape.
 - [ ] Typesetting fonts: "real" fonts and/or 5x7 characters (and numbers, whether 5x7 or 4x5) - maybe with half-tone anti-aliasing?
-- [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)- [ ] Possible efficiency improvements:
+- [ ] "Spontaneous generation" - occasionally add a new live cell near a randomly-chosen live cell. (to keep board alive; could be strictly UI)
+- [ ] Possible efficiency improvements:
   - [ ] Don't recalculate button position each time (may use subscribe?)
   - [ ] Specify the font size explicitly
   - [ ] Don't use Conway for wipe animation (or tell it to skip calculations...)

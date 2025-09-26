@@ -5,6 +5,7 @@ import { Coord } from './internal/grid.js'
 export interface LowresScreensaverConfig {
 	buttonGrid: string
 	boardSize: string
+	randomize: boolean
 	updateRate: number
 	wrap: boolean
 	onOffChars: string // two (or three?) character representing on, off, (and no-cell)
@@ -112,11 +113,19 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			allowCustom: true,
 		},
 		{
+			type: 'checkbox',
+			id: 'randomize',
+			label: 'Use Randomized Playlist',
+			tooltip: 'Determine whether the playlist of board configurations should be randomized.',
+			width: 12,
+			default: false,
+		},
+		{
 			type: 'number',
 			id: 'updateRate',
 			label: 'Game update rate (rounds/second)',
 			tooltip: 'Specify have many generations are computed each second.',
-			width: 8,
+			width: 12,
 			min: 1,
 			max: 10, // note: currently the achievable max appears to be 8 Hz
 			default: 5,
@@ -137,7 +146,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'ADVANCED: Wrap the grid edges',
 			tooltip:
 				'If "on", the board continues on the opposite sides. Generally, leaving "wrap" on is more interesting, except for very small boards (like 5x3).',
-			width: 8,
+			width: 12,
 			default: true,
 		},
 	]

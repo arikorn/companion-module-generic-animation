@@ -2,7 +2,7 @@ import { WipeEffect, AnimationCallbacks } from './wipeEffect.js'
 import { Coord, Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
 import { getShapeExtent, shapeArrayToGrid, shapes } from './shapes.js' //shapesByCategory, transpose
-
+import { randomOrder } from './utilities.js'
 interface BoardQueueItem {
 	shapeName: string
 	alignment: string
@@ -13,7 +13,12 @@ interface BoardQueueItem {
 export class GameController {
 	// the "conway" object:
 	theGame: GameOfLife
+	// boardsQueue is the active queue of board setups
 	boardsQueue: BoardQueueItem[] = []
+	// fullBoardsQueue is what the user specified, so it can be restored for looping/random queues
+	fullBoardsQueue: BoardQueueItem[] = []
+	repeatQueue = false
+	randomizeQueue = false
 	gameDelay = 500 // delay before starting a game or after finishing
 
 	// state for the UI:
@@ -94,22 +99,24 @@ export class GameController {
 		}
 	}
 
-	stop(queueNext = false): void {
+	// stop the animation. Only the internal routine should set gameOver to true, as this will advance the queue
+	stop(gameOver = false): void {
 		if (this.running !== null) {
 			clearInterval(this.running)
 			this.running = null
 		}
 		// this could be a "done" callback if we used the same protocol as in wipeEffect
 		//  not sure if that would be advantagous...
-		if (queueNext && this.boardsQueue.length > 0) {
-			this.popShapeQueue() // remove the current one only at the end of the game!
-			if (this.boardsQueue.length === 0) return // we're done: queue is empty
-			// else
+		if (gameOver) {
+			const newShape = this.advanceQueue() // always do this, so it removes the current board
+			if (newShape === null) return // we're done.
+			// ELSE:
+			// start the next item
 			// wait at end of game, then transition in new board, then wait to start next game...
 			this.running = setTimeout(() => {
 				// setup transition
 				this.running = null
-				const newBoard = this.newBoard(this.boardsQueue[0])
+				const newBoard = this.newBoard(newShape)
 				this.replaceBoard(newBoard, {
 					update: () => {
 						if (this.timerCallback !== null) this.timerCallback(this)
@@ -124,6 +131,7 @@ export class GameController {
 				})
 			}, this.gameDelay)
 		}
+
 		this.extraRounds = 0
 	}
 
@@ -196,6 +204,7 @@ export class GameController {
 		return newBoard
 	}
 
+	// add a shape to existing board (not yet used)
 	addShape(shape: string, offset: Coord): Grid {
 		// later we can center... and/or add transforms
 		const newBoard = this.theGame.present.copy()
@@ -206,10 +215,21 @@ export class GameController {
 
 	pushShapeQueue(shapes: BoardQueueItem[], updateBoard = this.boardsQueue.length === 0): Grid | null {
 		this.boardsQueue.push(...shapes)
+		this.fullBoardsQueue.push(...shapes)
+		this.refreshCurrentQueue()
 		if (updateBoard && this.boardsQueue.length > 0) {
 			return this.newBoard(this.boardsQueue[0])
 		}
 		return null
+	}
+
+	// call this when re-instating the cached queue:
+	refreshCurrentQueue(): void {
+		if (this.randomizeQueue) {
+			// randomize the active queue but leave the cache alone
+			const order = randomOrder(this.boardsQueue.length)
+			this.boardsQueue = order.map((idx) => this.boardsQueue[idx])
+		}
 	}
 
 	popShapeQueue(): void {
@@ -218,8 +238,30 @@ export class GameController {
 		}
 	}
 
+	// Retrieve the next item in the queue
+	advanceQueue(): BoardQueueItem | null {
+		if (this.boardsQueue.length > 0) {
+			this.popShapeQueue() // remove & discard the current board
+		}
+
+		if (this.boardsQueue.length === 0 && this.repeatQueue) {
+			this.boardsQueue = this.fullBoardsQueue.slice()
+			// randomize it if requested
+			this.refreshCurrentQueue()
+		}
+
+		if (this.boardsQueue.length === 0) {
+			// there's nothing to advance to
+			this.fullBoardsQueue = [] // clear everything
+			return null // we're done
+		} else {
+			return this.boardsQueue[0]
+		}
+	}
+
 	clearShapeQueue(): void {
 		this.boardsQueue = []
+		this.fullBoardsQueue = []
 	}
 
 	updateBoard(newBoard: Grid): void {

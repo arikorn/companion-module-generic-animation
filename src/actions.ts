@@ -92,6 +92,14 @@ function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = fal
 			range: true,
 			tooltip: 'Enter a Y (rows) offset to the placement.',
 		},
+		{
+			id: 'replace',
+			type: 'checkbox',
+			label: 'Replace playlist',
+			tooltip: 'Replace the current playlist with the selected items.',
+			default: true,
+			isVisibleExpression: `true === ${allowMultiple}`,
+		},
 	]
 }
 
@@ -127,15 +135,27 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					],
 					default: -1,
 				},
+				{
+					id: 'loop',
+					type: 'checkbox',
+					label: 'Repeat',
+					tooltip: 'Starting play will loop the current playlist until explicitly stopped',
+					default: false,
+				},
 			],
 			callback: async (event) => {
 				let action = Number(event.options.action)
+				const randomize = (event.options.random as boolean) ?? false
+				const loop = (event.options.loop as boolean) ?? false
+
 				if (action === undefined) {
 					console.log('Undefined action!')
 				}
 				if (action < 0) {
 					action = self.state.isRunning() ? 0 : 1
 				}
+				self.state.randomizeQueue = randomize
+				self.state.repeatQueue = loop
 				if (action === 0) {
 					self.stopGame()
 				} else {
@@ -144,9 +164,28 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			},
 		},
 		//============================
+		setRandomOrder: {
+			name: 'Randomize Playlist',
+			description: 'Choose whether or not to play the selected boards in random order (shuffle).',
+			options: [
+				{
+					id: 'random',
+					type: 'checkbox',
+					label: 'Enable Random Ordering',
+					tooltip: 'Determine whether the playlist of board configurations should be randomized.',
+					default: false,
+				},
+			],
+			callback: async (event) => {
+				const randomize = (event.options.random as boolean) ?? false
+
+				self.setRandomize(randomize)
+			},
+		},
+		//============================
 		setShape: {
 			name: 'Set Shape',
-			description: 'Put a shape on the board. Note that this clears the current board and queue.',
+			description: 'Put a shape on the board. Note that this clears the current board and playlist.',
 			options: createShapeOptions(self),
 			callback: async (event) => {
 				const category = event.options?.category
@@ -168,7 +207,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setShapeQueue: {
-			name: 'Queue Shapes',
+			name: 'Set or Add to Playlist of Shapes',
 			options: createShapeOptions(self, true), // allow multiple
 			callback: async ({ options }) => {
 				if (options !== undefined && options.category !== undefined) {
@@ -178,6 +217,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 						const position = options.pos as string
 						const offset = { x: Number(options.xOffset), y: Number(options.yOffset) }
 						const elements = shapes.map((shape) => ({ shapeName: shape, alignment: position, offset: offset }))
+						const replace = options.replace as boolean
+						if (replace) {
+							self.state.clearShapeQueue()
+						}
 						const newBoard = self.state.pushShapeQueue(elements)
 						self.state.stop()
 						if (newBoard !== null) {
@@ -251,7 +294,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setGameDelay: {
-			name: 'Set the delay between queued games',
+			name: 'Set the delay between games in the playlist',
 			options: [
 				{
 					id: 'time',
@@ -261,7 +304,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					min: 0,
 					max: 3000,
 					range: true,
-					tooltip: 'Enter the number of milliseconds between queued games',
+					tooltip: 'Enter the number of milliseconds between games when playing the playlist',
 				},
 			],
 			callback: async (event) => {

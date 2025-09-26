@@ -4,6 +4,11 @@ import { Grid, Wipe } from './grid.js'
 // TODO: Consider using requestAnimationFrame? https://www.google.com/search?q=react+requestAnimationFrame
 //   probably not in node.js?
 
+export interface AnimationCallbacks {
+	update?: () => void
+	done?: () => void
+}
+
 export class WipeEffect {
 	fromBoard: Grid
 	toBoard: Grid
@@ -12,18 +17,19 @@ export class WipeEffect {
 	// set in start():
 	shiftDir: Wipe = Wipe.Up // just to give it a value.
 	frameRate = 20 // ms
-	callback: (() => void) | null = null
+	callback: AnimationCallbacks = {}
 	fromIdx = 0
 	shifting: NodeJS.Timeout | null = null
 	controller = new AbortController() // a place-holder
 
+	// setBoard sets the internal representation of the board since we don't modify the original toBoard
 	constructor(fromBoard: Grid, toBoard: Grid, setBoard: (toBoard: Grid) => void) {
 		this.fromBoard = fromBoard
 		this.toBoard = toBoard
 		this.setBoard = setBoard
 	}
 
-	async start(direction: Wipe, callback: () => void, rate = 20): Promise<void> {
+	start(direction: Wipe, callbacks: AnimationCallbacks, rate = this.frameRate): void {
 		this.stop()
 		this.shiftDir = direction
 		this.frameRate = rate
@@ -37,30 +43,18 @@ export class WipeEffect {
 				break
 			default: // Left, Up start at 0
 		}
-		this.callback = callback
-		this.controller = new AbortController()
-		const signal = this.controller.signal
-		const promise = new Promise<void>((resolve) => {
-			this.shifting = setInterval(() => this.shiftOne(), this.frameRate)
-			signal.addEventListener(
-				'abort',
-				() => {
-					this.stop()
-					resolve()
-				},
-				{ once: true },
-			)
-		})
-		return promise
+		this.callback = callbacks
+		this.shifting = setInterval(() => this.shiftOne(), this.frameRate)
 	}
 
 	stop(): void {
 		if (this.shifting !== null) {
 			const interval = this.shifting
 			this.shifting = null
-			// abort will resolve the Promise, and call stop again, but it will be a noop
-			this.controller.abort()
 			clearInterval(interval)
+			if (this.callback.done !== undefined) {
+				this.callback.done()
+			}
 		}
 	}
 
@@ -89,8 +83,8 @@ export class WipeEffect {
 		if (!isShifting) {
 			this.stop()
 		}
-		if (this.callback !== null) {
-			this.callback()
+		if (this.callback.update !== undefined) {
+			this.callback.update()
 		}
 	}
 }

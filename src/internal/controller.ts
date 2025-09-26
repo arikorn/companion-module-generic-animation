@@ -1,4 +1,4 @@
-import { WipeEffect } from './wipeEffect.js'
+import { WipeEffect, AnimationCallbacks } from './wipeEffect.js'
 import { Coord, Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
 import { getShapeExtent, shapeArrayToGrid, shapes } from './shapes.js' //shapesByCategory, transpose
@@ -13,7 +13,7 @@ interface BoardQueueItem {
 export class GameController {
 	// the "conway" object:
 	theGame: GameOfLife
-	shapesQueue: BoardQueueItem[] = []
+	boardsQueue: BoardQueueItem[] = []
 	gameDelay = 500 // delay before starting a game or after finishing
 
 	// state for the UI:
@@ -56,6 +56,7 @@ export class GameController {
 	}
 
 	// the generational callback and timer start/stop/step functions
+	// nextRound: advance a single generation:
 	nextRound(): void {
 		//this.board =
 		this.theGame.next() // create next generation
@@ -98,29 +99,29 @@ export class GameController {
 			clearInterval(this.running)
 			this.running = null
 		}
-		if (queueNext && this.shapesQueue.length > 0) {
+		// this could be a "done" callback if we used the same protocol as in wipeEffect
+		//  not sure if that would be advantagous...
+		if (queueNext && this.boardsQueue.length > 0) {
 			this.popShapeQueue() // remove the current one only at the end of the game!
-			if (this.shapesQueue.length === 0) return // we're done: queue is empty
+			if (this.boardsQueue.length === 0) return // we're done: queue is empty
 			// else
 			// wait at end of game, then transition in new board, then wait to start next game...
 			this.running = setTimeout(() => {
 				// setup transition
 				this.running = null
-				const newBoard = this.setBoardToShape(this.shapesQueue[0])
-				this.replaceBoard(newBoard, () =>
-					this.wiperCallback(() => (this.timerCallback !== null ? this.timerCallback(this) : null)),
-				).then(
-					() => {
+				const newBoard = this.newBoard(this.boardsQueue[0])
+				this.replaceBoard(newBoard, {
+					update: () => {
+						if (this.timerCallback !== null) this.timerCallback(this)
+					},
+					done: () => {
 						// setup new game
 						this.running = setTimeout(() => {
 							this.running = null // to ensure game starts
 							this.start(this.timerCallback!, this.gameDelay)
 						}, this.gameDelay)
 					},
-					() => {
-						this.stop() // to be safe?
-					},
-				)
+				})
 			}, this.gameDelay)
 		}
 		this.extraRounds = 0
@@ -144,14 +145,14 @@ export class GameController {
 
 	//  **** Add/Set Shape ****
 	// probably should deprecate/remove this??:
-	addShapeToBoard(newBoard: Grid, shape: string, offset: Coord): void {
+	addShapeToBoard(board: Grid, shape: string, offset: Coord): void {
 		const toggle = shape === 'point'
 		const newShape = shapes.get(shape)
-		newBoard.setShape(newShape, toggle, offset)
+		board.setShape(newShape, toggle, offset)
 	}
 
 	// TODO: support board size
-	setBoardToShape({ shapeName, alignment, offset }: BoardQueueItem): Grid {
+	newBoard({ shapeName, alignment, offset }: BoardQueueItem): Grid {
 		const newBoard = new Grid(this.theGame.present.dims(), 0)
 		const theShape = shapes.get(shapeName)
 		const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
@@ -203,22 +204,22 @@ export class GameController {
 		return newBoard
 	}
 
-	pushShapeQueue(shapes: BoardQueueItem[], updateBoard = this.shapesQueue.length === 0): Grid | null {
-		this.shapesQueue.push(...shapes)
-		if (updateBoard && this.shapesQueue.length > 0) {
-			return this.setBoardToShape(this.shapesQueue[0])
+	pushShapeQueue(shapes: BoardQueueItem[], updateBoard = this.boardsQueue.length === 0): Grid | null {
+		this.boardsQueue.push(...shapes)
+		if (updateBoard && this.boardsQueue.length > 0) {
+			return this.newBoard(this.boardsQueue[0])
 		}
 		return null
 	}
 
 	popShapeQueue(): void {
-		if (this.shapesQueue.length > 0) {
-			this.shapesQueue.shift()
+		if (this.boardsQueue.length > 0) {
+			this.boardsQueue.shift()
 		}
 	}
 
 	clearShapeQueue(): void {
-		this.shapesQueue = []
+		this.boardsQueue = []
 	}
 
 	updateBoard(newBoard: Grid): void {
@@ -239,12 +240,26 @@ export class GameController {
 	// **** TRANSITION ACTIONS: REPLACE, RESET, CLEAR
 	wiper: WipeEffect | null = null
 
-	wiperCallback(callback: () => void | null): void {
-		if (this.wiper !== null && !this.wiper.isRunning()) {
-			// the wipe effect has completed, reset the instance variable:
-			this.wiper = null
+	// wrap internal maintenance around the user-supplied callback
+	wiperCallback(callback: AnimationCallbacks): AnimationCallbacks {
+		return {
+			done: () => {
+				this.wiper = null
+				if (callback.done !== undefined) {
+					callback.done()
+				}
+			},
+			update: () => {
+				if (callback.update !== undefined) {
+					callback.update()
+				}
+			},
 		}
-		if (callback != null) callback()
+		// if (this.wiper !== null && !this.wiper.isRunning()) {
+		// 	// the wipe effect has completed, reset the instance variable:
+		// 	this.wiper = null
+		// }
+		// if (callback != null) callback()
 	}
 
 	isWiping(): boolean {
@@ -252,7 +267,7 @@ export class GameController {
 	}
 
 	// replace the current board with a new board, using a wipe effect
-	async replaceBoard(fromBoard: Grid, callback: () => void | null): Promise<void> {
+	replaceBoard(fromBoard: Grid, callback: AnimationCallbacks): void {
 		this.generation = 0
 		const toBoard = this.theGame.present
 		// TODO: we don't really need to set the board, which counts the population
@@ -260,12 +275,12 @@ export class GameController {
 			this.wiper.stop()
 		}
 		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-		return this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => this.wiperCallback(callback))
+		return this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
 	}
 
 	//  **** RESET ****
 	// reset the current generation to the initial generation, using a wipe effect
-	resetBoard(callback: () => void, useTransition = true): void {
+	resetBoard(callback: AnimationCallbacks, useTransition = true): void {
 		// reset the board to the most recent initial state
 		const toBoard = this.theGame.present
 		const fromBoard = this.theGame.resetBoard()
@@ -275,14 +290,14 @@ export class GameController {
 		}
 		if (useTransition) {
 			this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-			void this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, () => this.wiperCallback(callback))
+			void this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
 		}
 		this.generation = 0
 	}
 
 	//  **** CLEAR ****
 	// clear the board using a wipe effect
-	clearBoard(callback: () => void): void {
+	clearBoard(callback: AnimationCallbacks): void {
 		// reset the board to the initial state
 		const fromBoard = this.theGame.present
 		this.theGame.clear()
@@ -296,7 +311,7 @@ export class GameController {
 		}
 		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
 		// Set direction to 0..3 (the default values for enum)
-		void this.wiper.start(Math.floor(Math.random() * 4), () => this.wiperCallback(callback))
+		void this.wiper.start(Math.floor(Math.random() * 4), this.wiperCallback(callback))
 	}
 
 	//  **** WRAP Checkbox ****

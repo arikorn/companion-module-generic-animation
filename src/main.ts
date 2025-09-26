@@ -66,7 +66,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		if (newSizeIsValid && newSizeChanged) {
 			this.boardSize = newBoardSize
 			this.state.setBoardSize(newBoardSize)
-			this.state.resetBoard(() => {}, false) // don't need a callback since we call updateEffects next
+			this.state.resetBoard({}, false) // don't need a callback since we call updateEffects next, and don't animate
 		}
 		// update the buttons
 		this.updateEfffects()

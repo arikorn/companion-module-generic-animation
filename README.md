@@ -19,14 +19,13 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Configurable cell-characters (blank vs. grid, maybe dimmer grid)
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
-- [ ] Allow adding more than one shape?
+- [ ] Allow adding more than one shape to a single board?
 - [x] Organize shapes, both internally and for the user. (probably could do better...)
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
 - [ ] Random shape selection
-- [x] Auto-chaining of games (queue either a category or arbitrary group)
-      -- [ ] better way with {update: (), done: ()} callbacks
-- [ ] (Put set shape on queue as well...)
+- [x] Auto-chaining of games (queue either a category or arbitrary group) - [x] better way with {update: (), done: ()} callbacks
+- [x] (Put set shape on queue as well...)
 - [ ] Continuous looping of queue / randomize queue
 - [x] Fix up prettier's mangling of shapes.ts? (or convert to...?)
 - [x] Customize within-button grid size

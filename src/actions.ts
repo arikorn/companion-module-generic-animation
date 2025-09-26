@@ -5,7 +5,7 @@ import {
 	CompanionInputFieldMultiDropdown,
 } from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
-import { Grid } from './internal/grid.js'
+//import { Grid } from './internal/grid.js'
 import { shapes, shapesByCategory } from './internal/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 
@@ -145,11 +145,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setShape: {
-			name: 'Add Shape',
+			name: 'Set Shape',
 			description: 'Put a shape on the board. Note that this clears the current board and queue.',
 			options: createShapeOptions(self),
 			callback: async (event) => {
-				const newBoard = new Grid(self.boardSize)
 				const category = event.options?.category
 				const shapeName = event.options?.[category as string] as string
 				if (shapeName === undefined || shapeName === null) {
@@ -158,13 +157,13 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const position = event.options.pos as string
 				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
 				//const theShape = shapes.get(shapeName)
-				self.state.setBoardToShape({ shapeName: shapeName, alignment: position, offset: offset })
+				const newBoard = self.state.newBoard({ shapeName: shapeName, alignment: position, offset: offset })
 				self.state.stop()
 				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.state.clearShapeQueue()
 				self.state.pushShapeQueue([{ shapeName: shapeName, alignment: position, offset: offset }])
-				void self.state.replaceBoard(newBoard, () => self.updateEfffects())
+				void self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
 			},
 		},
 		//============================
@@ -182,7 +181,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 						const newBoard = self.state.pushShapeQueue(elements)
 						self.state.stop()
 						if (newBoard !== null) {
-							void self.state.replaceBoard(newBoard, () => self.updateEfffects())
+							void self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
 						}
 					}
 				}

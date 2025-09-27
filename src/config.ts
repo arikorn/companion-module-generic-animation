@@ -94,15 +94,6 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'dropdown',
-			id: 'buttonGrid',
-			label: 'Grid Size INSIDE each button',
-			tooltip: 'Specify the size of the subgrid (width x height) shown on a button.',
-			width: 12,
-			choices: buttonSizeChoices(),
-			default: buttonSizeDefault(),
-		},
-		{
-			type: 'dropdown',
 			id: 'boardSize',
 			label: 'Total Board Size',
 			tooltip:
@@ -111,6 +102,15 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			choices: boardSizeChoices(),
 			default: boardSizeDefault(),
 			allowCustom: true,
+		},
+		{
+			type: 'dropdown',
+			id: 'buttonGrid',
+			label: 'Grid Size INSIDE each button',
+			tooltip: 'Specify the size of the subgrid (width x height) shown on a button.',
+			width: 12,
+			choices: buttonSizeChoices(),
+			default: buttonSizeDefault(),
 		},
 		{
 			type: 'checkbox',

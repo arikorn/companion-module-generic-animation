@@ -20,12 +20,14 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Allow offsets for positioning; finish positioning options
 - [x] Change speed while game is running
 - [x] Organize shapes, both internally and for the user. (probably could do better...)
+- [ ] Manually advance to next in queue
 - [ ] Allow shapes to be in more than one category
 - [ ] Allow game-timeout so "continuous" shapes can be played in a playlist
 - [ ] Create a timeout variable/feedback for use in Triggers (for screensaver functionality)
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
 - [ ] Random shape selection (i.e. user doesn't select a playlist at all)
+- [ ] Consider making "repeat" (loop) separate from the Start action?
 - [x] Auto-chaining of games (queue either a category or arbitrary group)
   - [x] better way with {update: (), done: ()} callbacks
 - [x] (Put set shape on queue as well...)

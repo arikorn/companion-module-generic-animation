@@ -78,10 +78,49 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 			options: [],
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
-				bgcolor: combineRgb(146, 146, 0),
+				bgcolor: combineRgb(0, 0, 128),
 			},
 			callback: async (_) => {
 				return self.state.isRunning()
+			},
+		},
+		ShuffleEnabled: {
+			type: 'boolean',
+			name: 'Shuffle is enabled',
+			description: 'Change appearance if shuffle is enabled.',
+			options: [],
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(146, 146, 0),
+			},
+			callback: async (_) => {
+				return self.state.randomizeQueue
+			},
+		},
+		RepeatEnabled: {
+			type: 'boolean',
+			name: 'Repeat is enabled',
+			description: 'Change appearance if playlist repeat is enabled.',
+			options: [],
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(146, 146, 0),
+			},
+			callback: async (_) => {
+				return self.state.repeatQueue
+			},
+		},
+		WrapEnabled: {
+			type: 'boolean',
+			name: 'Wrap is enabled',
+			description: 'Change appearance if the board is set to wrap-around.',
+			options: [],
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(146, 146, 0),
+			},
+			callback: async (_) => {
+				return self.state.getWrap()
 			},
 		},
 		BoardInTransition: {

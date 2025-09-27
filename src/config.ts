@@ -6,6 +6,7 @@ export interface LowresScreensaverConfig {
 	buttonGrid: string
 	boardSize: string
 	randomize: boolean
+	repeat: boolean
 	updateRate: number
 	wrap: boolean
 	onOffChars: string // two (or three?) character representing on, off, (and no-cell)
@@ -93,12 +94,28 @@ export function boardSizeDefault(): DropdownChoiceId {
 export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
+			type: 'checkbox',
+			id: 'repeat',
+			label: 'Enable Repeat',
+			tooltip: 'When enabled, loop the playlist continuously.',
+			width: 4,
+			default: false,
+		},
+		{
+			type: 'checkbox',
+			id: 'randomize',
+			label: 'Enable Shuffle',
+			tooltip: 'Determine whether the playlist of board configurations should be played in random order.',
+			width: 4,
+			default: false,
+		},
+		{
 			type: 'dropdown',
 			id: 'boardSize',
 			label: 'Total Board Size',
 			tooltip:
 				'Specify the size of the button grid ("fit to WxH") or the number of cells in the board (width x height). The board may be larger or smaller than the size allowed by the number of buttons times the button-grid size.',
-			width: 12,
+			width: 9,
 			choices: boardSizeChoices(),
 			default: boardSizeDefault(),
 			allowCustom: true,
@@ -108,24 +125,16 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'buttonGrid',
 			label: 'Grid Size INSIDE each button',
 			tooltip: 'Specify the size of the subgrid (width x height) shown on a button.',
-			width: 12,
+			width: 9,
 			choices: buttonSizeChoices(),
 			default: buttonSizeDefault(),
-		},
-		{
-			type: 'checkbox',
-			id: 'randomize',
-			label: 'Use Randomized Playlist',
-			tooltip: 'Determine whether the playlist of board configurations should be randomized.',
-			width: 12,
-			default: false,
 		},
 		{
 			type: 'number',
 			id: 'updateRate',
 			label: 'Game update rate (rounds/second)',
 			tooltip: 'Specify have many generations are computed each second.',
-			width: 12,
+			width: 9,
 			min: 1,
 			max: 10, // note: currently the achievable max appears to be 8 Hz
 			default: 5,
@@ -136,7 +145,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'ADVANCED: Glyphs for "on" and "off" -- see the help',
 			tooltip:
 				'Specify the pair of characters to represent cells that are, respectively, "on" (live) and "off" (dead).\nNote that the colors are reversed here and the relative scales are misleading',
-			width: 12,
+			width: 9,
 			choices: cellCharChoices,
 			default: cellCharChoices[0].id,
 		},
@@ -146,7 +155,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'ADVANCED: Wrap the grid edges',
 			tooltip:
 				'If "on", the board continues on the opposite sides. Generally, leaving "wrap" on is more interesting, except for very small boards (like 5x3).',
-			width: 12,
+			width: 9,
 			default: true,
 		},
 	]

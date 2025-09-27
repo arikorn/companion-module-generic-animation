@@ -37,22 +37,18 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.log('debug', 'destroy')
 	}
 
-	setRandomize(enable: boolean): void {
-		this.state.randomizeQueue = enable
-		this.saveConfig({ ...this.config, randomize: enable })
-	}
-
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
 		console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.state.genInterval = Math.round(1000 / config.updateRate)
-		if (!('randomize' in config)) {
-			// needed only for development, the first time the props were added
-			config = { ...(config as LowresScreensaverConfig), randomize: false }
+		if (!('repeat' in config)) {
+			// needed only for development, the first time the prop is added
+			config = { ...(config as LowresScreensaverConfig), repeat: false }
 			this.saveConfig(config)
 		}
 		this.state.randomizeQueue = config.randomize
+		this.state.repeatQueue = config.repeat
 		this.on = config.onOffChars[0]
 		this.off = config.onOffChars[1]
 		this.state.setWrap(config.wrap)
@@ -92,6 +88,18 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		await this.configUpdated(newConfig)
 	}
 
+	setRandomize(enable: boolean): void {
+		this.state.randomizeQueue = enable
+		this.saveConfig({ ...this.config, randomize: enable })
+		this.updateEfffects()
+	}
+
+	setRepeat(enable: boolean): void {
+		this.state.repeatQueue = enable
+		this.saveConfig({ ...this.config, repeat: enable })
+		this.updateEfffects()
+	}
+
 	setGenerationRate(rate: number): void {
 		const running = this.state.isRunning()
 		const newConfig = { ...this.config, updateRate: rate }
@@ -99,6 +107,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.stopGame()
 		this.state.genInterval = Math.round(1000 / newConfig.updateRate)
 		this.config = newConfig
+		this.updateEfffects() // in case we define a variable for generation rae
 		if (running) {
 			this.startGame()
 		}
@@ -115,11 +124,11 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		}
 	}
 
-	async setWrap(enable: boolean): Promise<void> {
+	setWrap(enable: boolean): void {
+		this.state.setWrap(enable)
 		const newConfig = { ...this.config, wrap: enable }
 		this.saveConfig(newConfig) // this does not trigger configUpdated
-		// we may need to change the board-size too, so...
-		await this.configUpdated(newConfig)
+		this.updateEfffects() // in case we define a variable for wrapping
 	}
 
 	// Return config fields for web config

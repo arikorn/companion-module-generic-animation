@@ -119,44 +119,46 @@ function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = fal
 // 	return true
 // }
 
+const enum OnOff {
+	Off = 0,
+	On = 1,
+	Toggle = -1,
+}
+
+const onOffChoices = [
+	{ id: OnOff.On, label: 'Enable' },
+	{ id: OnOff.Off, label: 'Disable' },
+	{ id: OnOff.Toggle, label: 'Toggle' },
+]
+
 export function UpdateActions(self: LowresScreensaverInstance): void {
 	self.setActionDefinitions({
 		startGame: {
-			name: 'Start/Stop Game',
+			name: 'Start/Stop (Play/Pause) the Game',
 			options: [
 				{
 					id: 'action',
 					type: 'dropdown',
 					label: 'Action',
 					choices: [
-						{ id: 0, label: 'Stop' },
-						{ id: 1, label: 'Start' },
-						{ id: -1, label: 'Toggle' },
+						{ id: OnOff.On, label: 'Start' },
+						{ id: OnOff.Off, label: 'Stop' },
+						{ id: OnOff.Toggle, label: 'Toggle' },
 					],
-					default: -1,
-				},
-				{
-					id: 'loop',
-					type: 'checkbox',
-					label: 'Repeat',
-					tooltip: 'Starting play will loop the current playlist until explicitly stopped',
-					default: false,
+					default: OnOff.Toggle,
 				},
 			],
 			callback: async (event) => {
-				let action = Number(event.options.action)
-				const randomize = (event.options.random as boolean) ?? false
-				const loop = (event.options.loop as boolean) ?? false
+				let action = event.options.action ?? null
 
-				if (action === undefined) {
-					console.log('Undefined action!')
+				if (action === null) {
+					console.log('Undefined Start/Stop action!')
+					return
 				}
-				if (action < 0) {
-					action = self.state.isRunning() ? 0 : 1
+				if (action === OnOff.Toggle) {
+					action = self.state.isRunning() ? OnOff.Off : OnOff.On
 				}
-				self.state.randomizeQueue = randomize
-				self.state.repeatQueue = loop
-				if (action === 0) {
+				if (action === OnOff.Off) {
 					self.stopGame()
 				} else {
 					self.startGame()
@@ -164,22 +166,52 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			},
 		},
 		//============================
+		setRepeat: {
+			name: 'Enable Repeat',
+			description: 'Choose whether or not to repeat the playlist when it is completed.',
+			options: [
+				{
+					id: 'repeat',
+					type: 'dropdown',
+					label: 'Enable Repeat',
+					choices: onOffChoices,
+					default: OnOff.Toggle,
+				},
+			],
+			callback: async ({ options }) => {
+				let repeat = options.repeat ?? null
+				if (repeat === OnOff.Toggle) {
+					repeat = self.state.repeatQueue ? OnOff.Off : OnOff.On
+				}
+				if (repeat !== null) {
+					self.setRepeat(repeat === OnOff.On)
+				}
+			},
+		},
+		//============================
 		setRandomOrder: {
-			name: 'Randomize Playlist',
-			description: 'Choose whether or not to play the selected boards in random order (shuffle).',
+			name: 'Enable Shuffle',
+			description: 'Choose whether or not to play the playlist in random order (shuffle).',
 			options: [
 				{
 					id: 'random',
-					type: 'checkbox',
-					label: 'Enable Random Ordering',
-					tooltip: 'Determine whether the playlist of board configurations should be randomized.',
-					default: false,
+					type: 'dropdown',
+					label: 'Enable Shuffle (Random Ordering)',
+					tooltip:
+						'Determine whether the playlist of board configurations should be randomized.' +
+						' Note: this command does not randomize the current playlist.',
+					choices: onOffChoices,
+					default: OnOff.Toggle,
 				},
 			],
-			callback: async (event) => {
-				const randomize = (event.options.random as boolean) ?? false
-
-				self.setRandomize(randomize)
+			callback: async ({ options }) => {
+				let random = options.random ?? null
+				if (random === OnOff.Toggle) {
+					random = self.state.randomizeQueue ? OnOff.Off : OnOff.On
+				}
+				if (random !== null) {
+					self.setRandomize(random === OnOff.On)
+				}
 			},
 		},
 		//============================
@@ -202,7 +234,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.state.clearShapeQueue()
 				self.state.pushShapeQueue([{ shapeName: shapeName, alignment: position, offset: offset }])
-				void self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
+				self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
 			},
 		},
 		//============================
@@ -224,10 +256,24 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 						const newBoard = self.state.pushShapeQueue(elements)
 						self.state.stop()
 						if (newBoard !== null) {
-							void self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
+							self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
 						}
 					}
 				}
+			},
+		},
+		//============================
+		nextInQueue: {
+			name: 'Next Item in the Playlist',
+			description: "Advance to the next item in the playlist (but don't start playing).",
+			options: [],
+			callback: async (_event) => {
+				const nextItem = self.state.advanceQueue()
+				if (nextItem === null) return // queue is empty, repeat is off
+				// ELSE
+				const newBoard = self.state.newBoard(nextItem)
+				self.state.stop()
+				self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
 			},
 		},
 		//============================
@@ -342,15 +388,21 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			options: [
 				{
 					id: 'wrap',
-					type: 'checkbox',
+					type: 'dropdown',
 					label: 'Wrap the grid',
-					default: true,
+					choices: onOffChoices,
+					default: OnOff.Toggle,
 					tooltip: 'Wrap the grid so edges continue on the opposite side',
 				},
 			],
-			callback: async (event) => {
-				const wrap = Boolean(event.options.wrap)
-				await self.setWrap(wrap)
+			callback: async ({ options }) => {
+				let wrap = options.wrap ?? null
+				if (wrap === OnOff.Toggle) {
+					wrap = self.state.getWrap() ? OnOff.Off : OnOff.On
+				}
+				if (wrap !== null) {
+					self.setWrap(wrap === OnOff.On)
+				}
 			},
 		},
 	})

@@ -29,7 +29,6 @@ export class GameController {
 	timerCallback: ((self: GameController) => void) | null = null
 	genInterval = 500 // generation interval in ms
 	shape = 'point' // for pull-down menu
-	wrap = true // should the board act like a torus? (bottom wraps to top, etc.)
 
 	// game-over extension:
 	extraRounds = 0
@@ -332,7 +331,7 @@ export class GameController {
 		}
 		if (useTransition) {
 			this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-			void this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
+			this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
 		}
 		this.generation = 0
 	}
@@ -353,13 +352,17 @@ export class GameController {
 		}
 		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
 		// Set direction to 0..3 (the default values for enum)
-		void this.wiper.start(Math.floor(Math.random() * 4), this.wiperCallback(callback))
+		this.wiper.start(Math.floor(Math.random() * 4), this.wiperCallback(callback))
 	}
 
 	//  **** WRAP Checkbox ****
 	// whether to treat board as a "cylindrical" surface (in both dimensions).
 	setWrap(enable = true): void {
 		this.theGame.setWrap(enable)
+	}
+
+	getWrap(): boolean {
+		return this.theGame.wrap
 	}
 
 	// **** COPY (to clipboard) ****

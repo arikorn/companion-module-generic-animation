@@ -228,13 +228,13 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const position = event.options.pos as string
 				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
 				//const theShape = shapes.get(shapeName)
-				const newBoard = self.state.newBoard({ shapeName: shapeName, alignment: position, offset: offset })
-				self.state.stop()
+				const shapeSpec = { shapeName: shapeName, alignment: position, offset: offset }
+				self.state.stop() // just to be safe. "manual" stop() should not affect the queue
 				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.state.clearShapeQueue()
-				self.state.pushShapeQueue([{ shapeName: shapeName, alignment: position, offset: offset }])
-				self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
+				self.state.pushShapeQueue([shapeSpec])
+				self.replaceBoard(self.state.newBoard(shapeSpec))
 			},
 		},
 		//============================
@@ -253,13 +253,21 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 						if (replace) {
 							self.state.clearShapeQueue()
 						}
-						const newBoard = self.state.pushShapeQueue(elements)
-						self.state.stop()
-						if (newBoard !== null) {
-							self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
-						}
+						// replace the board, or noop if pushShapeQueue returns null (queue was not empty)
+						self.replaceBoard(self.state.pushShapeQueue(elements))
 					}
 				}
+			},
+		},
+		//============================
+		clearQueue: {
+			name: 'Clear the Playlist',
+			description:
+				'Clear the playlist.' +
+				' Note: this does not affect a currently-playing game but if something is playing it will not repeat.',
+			options: [],
+			callback: async (_event) => {
+				self.state.clearShapeQueue()
 			},
 		},
 		//============================
@@ -271,9 +279,18 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const nextItem = self.state.advanceQueue()
 				if (nextItem === null) return // queue is empty, repeat is off
 				// ELSE
-				const newBoard = self.state.newBoard(nextItem)
-				self.state.stop()
-				self.state.replaceBoard(newBoard, { update: () => self.updateEfffects() })
+				self.replaceBoard(self.state.newBoard(nextItem))
+			},
+		},
+		//============================
+		clearBoard: {
+			name: 'Clear the Board',
+			description:
+				'Clear the board, stopping the current game. Note: to get the next board use "Next Item in the Playlist".',
+			options: [],
+			callback: async (_event) => {
+				// Note: user should call nextInQueue to get the next board
+				self.clearBoard()
 			},
 		},
 		//============================

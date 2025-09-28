@@ -21,9 +21,14 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Change speed while game is running
 - [x] Organize shapes, both internally and for the user. (probably could do better...)
 - [x] Manually advance to next in queue
+- [x] Manually clear board
+- [ ] Settable inter-game delay
+- [ ] Settable wipe speed? (or is it there, but not in config...?)
+- [ ] Allow shapes to include settings that override the default (such as board size for the special-case marquees)
 - [ ] Allow shapes to be in more than one category
 - [ ] Allow game-timeout so "continuous" shapes can be played in a playlist (or just let user do it with standard actions?)
 - [ ] Create a timeout variable/feedback for use in Triggers (for screensaver functionality)
+- [ ] Add Presets (the "main" button, settings, stats, ...); remove colors from feedbacks
 - [ ] Set shape to arbitrary text
 - [ ] Possibly, smart placement of text???
 - [ ] Random shape selection (i.e. user doesn't select a playlist at all)
@@ -36,14 +41,13 @@ See the user [HELP.md](./companion/HELP.md) for more details...
 - [x] Customize within-button grid size
 - [x] Enable/disable wrapping in Conway
 - [ ] Looping wipe transitions, user-selectable direction
+- [ ] Ticker-style text (i.e. scrolling something wider than the board)
 - [x] Add 60x30 marquee?
 - [x] Specify rate rather than period for update timer
 - [x] Add variables for generation and population (and running and board size)
 - [x] Animation: set a variable with animation status (on/off) for triggers
 - [x] Add feedbacks for running, transitioning (wiping)
 - [ ] Allow adding more than one shape to a single board?
-- [ ] Add Presets (the "main" button, settings, stats, ...); remove colors from feedbacks
-- [ ] Add controllable wipe speed?
 - [ ] Allow user to specify an offset for button position relative to the internal grid
 - [ ] User access to shape transforms? (Also: implement rotate() function in shapes.ts)
 - [ ] User-specified shapes? and allow user to save current shape.

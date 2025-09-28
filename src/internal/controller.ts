@@ -84,16 +84,10 @@ export class GameController {
 		}
 	}
 
-	start(callback: (self: GameController) => void, delay = 0): void {
+	start(callback: (self: GameController) => void): void {
 		this.timerCallback = callback
-		const startGame = () => (this.running = setInterval(() => this.nextRound(), this.genInterval))
 		if (this.running === null) {
-			if (delay > 0) {
-				this.gameDelay = delay
-				this.running = setTimeout(startGame, delay)
-			} else {
-				startGame()
-			}
+			this.running = setInterval(() => this.nextRound(), this.genInterval)
 			this.extraRounds = 0
 		}
 	}
@@ -101,8 +95,9 @@ export class GameController {
 	// stop the animation. Only the internal routine should set gameOver to true, as this will advance the queue
 	stop(gameOver = false): void {
 		if (this.running !== null) {
-			clearInterval(this.running)
+			const interval = this.running
 			this.running = null
+			clearInterval(interval)
 		}
 		// this could be a "done" callback if we used the same protocol as in wipeEffect
 		//  not sure if that would be advantagous...
@@ -124,7 +119,7 @@ export class GameController {
 						// setup new game
 						this.running = setTimeout(() => {
 							this.running = null // to ensure game starts
-							this.start(this.timerCallback!, this.gameDelay)
+							this.start(this.timerCallback!)
 						}, this.gameDelay)
 					},
 				})
@@ -158,9 +153,13 @@ export class GameController {
 		board.setShape(newShape, toggle, offset)
 	}
 
-	// TODO: support board size
-	newBoard({ shapeName, alignment, offset }: BoardQueueItem): Grid {
+	// TODO: support board size, other settings?, temporarily overriding default
+	newBoard(shapeSpec: BoardQueueItem | null): Grid {
 		const newBoard = new Grid(this.theGame.present.dims(), 0)
+		if (shapeSpec === null) {
+			return newBoard
+		} // ELSE
+		const { shapeName, alignment, offset } = shapeSpec
 		const theShape = shapes.get(shapeName)
 		const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
 		const boardSize = this.getBoardSize()
@@ -307,6 +306,14 @@ export class GameController {
 		return this.wiper !== null
 	}
 
+	stopTransition(): void {
+		if (this.wiper !== null) {
+			const wipeObject = this.wiper
+			this.wiper = null
+			wipeObject.stop()
+		}
+	}
+
 	// replace the current board with a new board, using a wipe effect
 	replaceBoard(fromBoard: Grid, callback: AnimationCallbacks): void {
 		this.generation = 0
@@ -340,9 +347,10 @@ export class GameController {
 	// clear the board using a wipe effect
 	clearBoard(callback: AnimationCallbacks): void {
 		// reset the board to the initial state
-		const fromBoard = this.theGame.present
+		const toBoard = this.theGame.present // we are putting the clear board *into* the current board
 		this.theGame.clear()
-		const toBoard = this.theGame.present
+		const fromBoard = this.theGame.present
+		//eventually just use: this.replaceBoard(fromBoard, callback, direction)
 		this.generation = 0
 		// if instantaneous:
 		//setBoard(theGame.present)

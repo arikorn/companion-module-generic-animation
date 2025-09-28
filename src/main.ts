@@ -5,7 +5,7 @@ import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GameController } from './internal/controller.js'
-import { Coord } from './internal/grid.js'
+import { Coord, Grid } from './internal/grid.js'
 export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
 	config!: LowresScreensaverConfig // Setup in init()
 
@@ -33,7 +33,8 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	// When module gets deleted
 	async destroy(): Promise<void> {
-		this.state.stop() // stop any running timer
+		this.state.stop() // stop any running game
+		this.state.stopTransition()
 		this.log('debug', 'destroy')
 	}
 
@@ -151,6 +152,18 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	updateEfffects(): void {
 		this.checkFeedbacks()
 		updateVariableValues(this)
+	}
+
+	replaceBoard(newBoard: Grid | null): void {
+		if (newBoard !== null) {
+			this.stopGame()
+			this.state.replaceBoard(newBoard, { update: () => this.updateEfffects() })
+		}
+	}
+
+	clearBoard(): void {
+		this.stopGame()
+		this.state.clearBoard({ update: () => this.updateEfffects() })
 	}
 
 	startGame(): void {

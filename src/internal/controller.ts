@@ -150,7 +150,9 @@ export class GameController {
 	addShapeToBoard(board: Grid, shape: string, offset: Coord): void {
 		const toggle = shape === 'point'
 		const newShape = shapes.get(shape)
-		board.setShape(newShape, toggle, offset)
+		if (newShape !== undefined) {
+			board.setShape(newShape, toggle, offset)
+		}
 	}
 
 	// TODO: support board size, other settings?, temporarily overriding default
@@ -160,7 +162,7 @@ export class GameController {
 			return newBoard
 		} // ELSE
 		const { shapeName, alignment, offset } = shapeSpec
-		const theShape = shapes.get(shapeName)
+		const theShape = shapes.get(shapeName)! // we don't allow custom values
 		const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
 		const boardSize = this.getBoardSize()
 		const midBoard = { y: Math.round(boardSize.y / 2), x: Math.round(boardSize.x / 2) }

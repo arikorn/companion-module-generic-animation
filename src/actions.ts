@@ -234,7 +234,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.state.clearShapeQueue()
 				self.state.pushShapeQueue([shapeSpec])
-				self.replaceBoard(self.state.newBoard(shapeSpec))
+				await self.replaceBoard(self.state.newBoard(shapeSpec))
 			},
 		},
 		//============================
@@ -254,7 +254,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 							self.state.clearShapeQueue()
 						}
 						// replace the board, or noop if pushShapeQueue returns null (queue was not empty)
-						self.replaceBoard(self.state.pushShapeQueue(elements))
+						await self.replaceBoard(self.state.pushShapeQueue(elements))
 					}
 				}
 			},
@@ -279,7 +279,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const nextItem = self.state.advanceQueue()
 				if (nextItem === null) return // queue is empty, repeat is off
 				// ELSE
-				self.replaceBoard(self.state.newBoard(nextItem))
+				await self.replaceBoard(self.state.newBoard(nextItem))
 			},
 		},
 		//============================
@@ -290,7 +290,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			options: [],
 			callback: async (_event) => {
 				// Note: user should call nextInQueue to get the next board
-				self.clearBoard()
+				await self.clearBoard()
 			},
 		},
 		//============================

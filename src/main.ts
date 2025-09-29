@@ -154,18 +154,31 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		updateVariableValues(this)
 	}
 
-	replaceBoard(newBoard: Grid | null): void {
-		if (newBoard !== null) {
+	async replaceBoard(newBoard: Grid | null): Promise<void> {
+		return new Promise<void>((resolve) => {
+			if (newBoard !== null) {
+				this.stopGame()
+				this.state.replaceBoard(newBoard, {
+					update: () => this.updateEfffects(),
+					done: () => resolve(),
+				})
+			} else {
+				resolve()
+			}
+		})
+	}
+
+	async clearBoard(): Promise<void> {
+		return new Promise<void>((resolve) => {
 			this.stopGame()
-			this.state.replaceBoard(newBoard, { update: () => this.updateEfffects() })
-		}
+			this.state.clearBoard({
+				update: () => this.updateEfffects(),
+				done: () => resolve(),
+			})
+		})
 	}
 
-	clearBoard(): void {
-		this.stopGame()
-		this.state.clearBoard({ update: () => this.updateEfffects() })
-	}
-
+	// note that we intentionally do not make startGame into a Promise so that a sequential action group is able to stop a game
 	startGame(): void {
 		this.state.start((_controller) => this.updateEfffects())
 	}

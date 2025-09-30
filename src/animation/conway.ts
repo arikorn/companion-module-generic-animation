@@ -84,8 +84,8 @@ export class GameOfLife {
 		const nextgen = new Grid(source.dims(), 0)
 		const neighbors = nextgen.copy()
 
+		// Compute neighbor values efficiently: for each "live" cell, increment all of its neighbors
 		// TODO: Use some way that doesn't depend on internal representation?
-		// compute neighbor values efficiently: for each "live" cell, increment all of its neighbors
 		for (let row = 0; row < rows; row++) {
 			const rowArray = source.getRow(row)
 			rowArray.forEach((value, col) => {
@@ -117,7 +117,6 @@ export class GameOfLife {
 			}
 		}
 
-		// TODO: Store current state, initial state
 		this.nAlive = nAlive
 		this.present = nextgen
 		return this.present

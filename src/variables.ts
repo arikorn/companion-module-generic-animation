@@ -12,10 +12,10 @@ export function UpdateVariableDefinitions(self: LowresScreensaverInstance): void
 
 export function updateVariableValues(self: LowresScreensaverInstance): void {
 	self.setVariableValues({
-		generation: self.state.getGeneration(),
-		population: self.state.getPopulation(),
+		generation: self.animation.getGeneration(),
+		population: self.animation.getPopulation(),
 		boardSize: `${self.boardSize.x}x${self.boardSize.y}`,
-		running: self.state.isRunning(),
-		transitioning: self.state.isWiping(),
+		running: self.animation.isGameRunning(),
+		transitioning: self.animation.isWiping(),
 	})
 }

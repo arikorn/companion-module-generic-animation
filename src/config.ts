@@ -1,6 +1,6 @@
 import { type SomeCompanionConfigField } from '@companion-module/base' //Regex,
 import { DropdownChoiceId, DropdownChoice } from '@companion-module/base'
-import { Coord } from './internal/grid.js'
+import { Coord } from './animation/grid.js'
 
 export interface LowresScreensaverConfig {
 	buttonGrid: string

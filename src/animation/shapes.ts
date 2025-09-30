@@ -78,7 +78,17 @@ export function vmirror(coords: Coord[]): Coord[] {
 	return coords.map((bit) => ({ x: bit.x, y: maxy - bit.y }))
 }
 
-// TODO: rotate
+export function rotate90cw(coords: Coord[]): Coord[] {
+	return hmirror(transpose(coords))
+}
+
+export function rotate90ccw(coords: Coord[]): Coord[] {
+	return vmirror(transpose(coords))
+}
+
+export function rotate180(coords: Coord[]): Coord[] {
+	return vmirror(hmirror(coords))
+}
 
 export function shapeFromBitmap(bits: number[][]): Coord[] {
 	const result: Coord[] = []

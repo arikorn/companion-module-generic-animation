@@ -4,12 +4,12 @@ import { UpdateVariableDefinitions, updateVariableValues } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
-import { GameController } from './internal/controller.js'
-import { Coord, Grid } from './internal/grid.js'
+import { GameController } from './animation/controller.js'
+import { Coord, Grid } from './animation/grid.js'
 export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
 	config!: LowresScreensaverConfig // Setup in init()
 
-	state: GameController
+	animation: GameController
 	buttonGrid: Coord = { x: 11, y: 10 } // value is just a placeholder
 	boardSize: Coord = { x: 11, y: 10 } // value is just a placeholder
 	on: string = cellCharChoices[0].id[0] // character representing "live" cells
@@ -17,7 +17,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	constructor(internal: unknown) {
 		super(internal)
-		this.state = new GameController(this.boardSize)
+		this.animation = new GameController(this.boardSize)
 	}
 
 	async init(config: LowresScreensaverConfig): Promise<void> {
@@ -33,7 +33,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	// When module gets deleted
 	async destroy(): Promise<void> {
-		this.state.stop() // stop any running game or transition
+		this.animation.stop() // stop any running game or transition
 		this.log('debug', 'destroy')
 	}
 
@@ -41,17 +41,17 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		//debug: console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
-		this.state.genInterval = Math.round(1000 / config.updateRate)
+		this.animation.genInterval = Math.round(1000 / config.updateRate)
 		if (!('repeat' in config)) {
 			// needed only for development, the first time the prop is added
 			config = { ...(config as LowresScreensaverConfig), repeat: false }
 			this.saveConfig(config)
 		}
-		this.state.randomizeQueue = config.randomize
-		this.state.repeatQueue = config.repeat
+		this.animation.randomizeQueue = config.randomize
+		this.animation.repeatQueue = config.repeat
 		this.on = config.onOffChars[0]
 		this.off = config.onOffChars[1]
-		this.state.setWrap(config.wrap)
+		this.animation.setWrap(config.wrap)
 		this.config = config
 		// board size is a bit more complicated...
 		let newBoardSize: Coord
@@ -67,7 +67,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		const newSizeChanged = newBoardSize.x !== this.boardSize.x || newBoardSize.y !== this.boardSize.y
 		if (newSizeIsValid && newSizeChanged) {
 			this.boardSize = newBoardSize
-			this.state.setBoardSize(newBoardSize)
+			this.animation.setBoardSize(newBoardSize)
 			// this doesn't/shouldn't work with different sizes
 			//this.state.resetBoard({}, false) // don't need a callback since we call updateEffects next, and don't animate
 		}
@@ -102,7 +102,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	}
 
 	async setGenerationRate(rate: number): Promise<void> {
-		const running = this.state.isGameRunning()
+		const running = this.animation.isGameRunning()
 		const newConfig = { ...this.config, updateRate: rate }
 		this.saveConfig(newConfig) // this does not trigger configUpdated
 		this.stopGame()
@@ -155,7 +155,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		return new Promise<void>((resolve) => {
 			if (newBoard !== null) {
 				this.stopGame()
-				this.state.replaceBoard(newBoard, {
+				this.animation.replaceBoard(newBoard, {
 					update: () => this.updateEfffects(),
 					done: () => resolve(), // whether aborted or not
 				})
@@ -168,7 +168,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	async clearBoard(): Promise<void> {
 		return new Promise<void>((resolve) => {
 			this.stopGame()
-			this.state.clearBoard({
+			this.animation.clearBoard({
 				update: () => this.updateEfffects(),
 				done: () => resolve(), // whether aborted or not
 			})
@@ -177,12 +177,12 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	// note that we intentionally do not make startGame into a Promise so that a sequential action group is able to stop a game
 	startGame(): void {
-		this.state.start((_controller) => this.updateEfffects())
+		this.animation.start((_controller) => this.updateEfffects())
 	}
 
 	stopGame(): void {
 		//debug: console.log(`main.stopGame()`)
-		this.state.stop() // stop game and/or transition
+		this.animation.stop() // stop game and/or transition
 		this.updateEfffects()
 	}
 }

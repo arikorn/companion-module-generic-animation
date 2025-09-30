@@ -6,7 +6,7 @@ import {
 } from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
 //import { Grid } from './internal/grid.js'
-import { shapes, shapesByCategory } from './internal/shapes.js'
+import { shapes, shapesByCategory } from './animation/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 
 // Make the menu choices from the keys of the map.
@@ -157,7 +157,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					return
 				}
 				if (action === OnOff.Toggle) {
-					action = self.state.isRunning() ? OnOff.Off : OnOff.On
+					action = self.animation.isRunning() ? OnOff.Off : OnOff.On
 				}
 				if (action === OnOff.Off) {
 					//debug: console.log(`action.stopGame()`)
@@ -183,10 +183,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			callback: async ({ options }) => {
 				let repeat = options.repeat ?? null
 				if (repeat === OnOff.Toggle) {
-					repeat = self.state.repeatQueue ? OnOff.Off : OnOff.On
+					repeat = self.animation.repeatQueue ? OnOff.Off : OnOff.On
 				}
 				if (repeat !== null) {
-					self.setRepeat(repeat === OnOff.On)
+					await self.setRepeat(repeat === OnOff.On)
 				}
 			},
 		},
@@ -209,10 +209,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			callback: async ({ options }) => {
 				let random = options.random ?? null
 				if (random === OnOff.Toggle) {
-					random = self.state.randomizeQueue ? OnOff.Off : OnOff.On
+					random = self.animation.randomizeQueue ? OnOff.Off : OnOff.On
 				}
 				if (random !== null) {
-					self.setRandomize(random === OnOff.On)
+					await self.setRandomize(random === OnOff.On)
 				}
 			},
 		},
@@ -234,9 +234,9 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				self.stopGame() // just to be safe. "manual" stop() should not affect the queue
 				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
 				//  and also allows other shapes to be queued without removing this shape from the board.
-				self.state.clearShapeQueue()
-				self.state.pushShapeQueue([shapeSpec])
-				await self.replaceBoard(self.state.newBoard(shapeSpec))
+				self.animation.clearShapeQueue()
+				self.animation.pushShapeQueue([shapeSpec])
+				await self.replaceBoard(self.animation.newBoard(shapeSpec))
 			},
 		},
 		//============================
@@ -255,10 +255,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 						const elements = shapes.map((shape) => ({ shapeName: shape, alignment: position, offset: offset }))
 						const replace = options.replace as boolean
 						if (replace) {
-							self.state.clearShapeQueue()
+							self.animation.clearShapeQueue()
 						}
 						// replace the board, or noop if pushShapeQueue returns null (queue was not empty)
-						await self.replaceBoard(self.state.pushShapeQueue(elements))
+						await self.replaceBoard(self.animation.pushShapeQueue(elements))
 					}
 				}
 			},
@@ -271,7 +271,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				' Note: this does not affect a currently-playing game but if something is playing it will not repeat.',
 			options: [],
 			callback: async (_event) => {
-				self.state.clearShapeQueue()
+				self.animation.clearShapeQueue()
 			},
 		},
 		//============================
@@ -280,10 +280,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			description: "Advance to the next item in the playlist (but don't start playing).",
 			options: [],
 			callback: async (_event) => {
-				const nextItem = self.state.advanceQueue()
+				const nextItem = self.animation.advanceQueue()
 				if (nextItem === null) return // queue is empty, repeat is off
 				// ELSE
-				await self.replaceBoard(self.state.newBoard(nextItem))
+				await self.replaceBoard(self.animation.newBoard(nextItem))
 			},
 		},
 		//============================
@@ -358,7 +358,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const rate: number = Number(event.options.time)
 				if (!isNaN(rate)) {
 					// enforce the range
-					self.setGenerationRate(Math.max(1, Math.min(10, rate)))
+					await self.setGenerationRate(Math.max(1, Math.min(10, rate)))
 				}
 			},
 		},
@@ -381,7 +381,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const delay = Number(event.options.time)
 				if (!isNaN(delay)) {
 					// enforce the range
-					self.state.gameDelay = delay
+					self.animation.gameDelay = delay
 				}
 			},
 		},
@@ -402,7 +402,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			],
 			callback: async (event) => {
 				if (event.options.onOffChars !== undefined) {
-					self.setOnfOffChars(String(event.options.onOffChars))
+					await self.setOnfOffChars(String(event.options.onOffChars))
 				}
 			},
 		},
@@ -423,10 +423,10 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			callback: async ({ options }) => {
 				let wrap = options.wrap ?? null
 				if (wrap === OnOff.Toggle) {
-					wrap = self.state.getWrap() ? OnOff.Off : OnOff.On
+					wrap = self.animation.getWrap() ? OnOff.Off : OnOff.On
 				}
 				if (wrap !== null) {
-					self.setWrap(wrap === OnOff.On)
+					await self.setWrap(wrap === OnOff.On)
 				}
 			},
 		},

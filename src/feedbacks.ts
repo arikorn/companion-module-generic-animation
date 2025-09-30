@@ -3,37 +3,6 @@ import type { LowresScreensaverInstance } from './main.js'
 
 export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 	self.setFeedbackDefinitions({
-		Text_X_Y: {
-			type: 'advanced',
-			name: 'Test local variable',
-			description: 'Change button text',
-			options: [
-				{
-					id: 'X_Y',
-					type: 'dropdown',
-					label: 'X/Y',
-					choices: [{ id: '$(this:row),$(this:column)', label: 'Just this' }],
-					default: '$(this:row),$(this:column)',
-				},
-				{
-					// this does not show up in options:
-					id: 'X_Y_const',
-					type: 'static-text',
-					label: 'X/Y, too',
-					value: '$(this:row),$(this:column)',
-				},
-			],
-			callback: async (feedback, context) => {
-				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
-				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
-				const opt = feedback.options.X_Y // not parsed with companion/base 1.11.x
-				return {
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(72, 72, 72),
-					text: `row:${controlY} col:${controlX} ${controlY + controlX}\n${opt}`,
-				}
-			},
-		},
 		Conway: {
 			type: 'advanced',
 			name: 'ADVANCED: Setup a Conway button',
@@ -46,7 +15,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				return {
 					color: combineRgb(146, 146, 146),
 					bgcolor: combineRgb(0, 0, 0),
-					text: self.state.getBoard().toGlyphString(self.off, self.on),
+					text: self.animation.getBoard().toGlyphString(self.off, self.on),
 					show_topbar: false,
 				}
 			},
@@ -66,7 +35,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				return {
 					color: combineRgb(146, 146, 146),
 					bgcolor: combineRgb(0, 0, 0),
-					text: self.state.getBoard().toGlyphString(self.off, self.on, span),
+					text: self.animation.getBoard().toGlyphString(self.off, self.on, span),
 					show_topbar: false,
 				}
 			},
@@ -81,7 +50,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(0, 0, 128),
 			},
 			callback: async (_) => {
-				return self.state.isGameRunning()
+				return self.animation.isGameRunning()
 			},
 		},
 		ShuffleEnabled: {
@@ -94,7 +63,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(146, 146, 0),
 			},
 			callback: async (_) => {
-				return self.state.randomizeQueue
+				return self.animation.randomizeQueue
 			},
 		},
 		RepeatEnabled: {
@@ -107,7 +76,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(146, 146, 0),
 			},
 			callback: async (_) => {
-				return self.state.repeatQueue
+				return self.animation.repeatQueue
 			},
 		},
 		WrapEnabled: {
@@ -120,7 +89,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(146, 146, 0),
 			},
 			callback: async (_) => {
-				return self.state.getWrap()
+				return self.animation.getWrap()
 			},
 		},
 		BoardInTransition: {
@@ -133,7 +102,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(146, 20, 0),
 			},
 			callback: async (_) => {
-				return self.state.isWiping()
+				return self.animation.isWiping()
 			},
 		},
 	})

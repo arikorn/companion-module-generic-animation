@@ -24,7 +24,7 @@ export class GameController {
 	// state for the UI:
 	//board: Grid //theGame.present
 	generation = 0
-	running: NodeJS.Timeout | null
+	running: Array<ReturnType<typeof setTimeout> | WipeEffect> = []
 	// callback for the UI to update itself after each step (whether wipe or Conway)
 	timerCallback: ((self: GameController) => void) | null = null
 	genInterval = 500 // generation interval in ms
@@ -36,7 +36,6 @@ export class GameController {
 	constructor(size: Coord) {
 		this.theGame = new GameOfLife(size)
 		//this.board = this.theGame.present
-		this.running = null
 	}
 
 	getBoard(): Grid {
@@ -48,7 +47,13 @@ export class GameController {
 	}
 
 	isRunning(): boolean {
-		return this.running !== null
+		return this.running.length > 0
+	}
+
+	isGameRunning(): boolean {
+		// "instanceof NodeJS.Timeout" is refused by the compiler, so...
+		// if adding new animation types, this may need attention. Maybe create a "dummy class" for Intervals
+		return this.running.some((obj) => !(obj instanceof WipeEffect))
 	}
 
 	getGeneration(): number {
@@ -85,52 +90,73 @@ export class GameController {
 	}
 
 	start(callback: (self: GameController) => void): void {
+		//debug: console.log(`GameController.start(); isRunning = ${this.isRunning()}`)
 		this.timerCallback = callback
-		if (this.running === null) {
-			this.running = setInterval(() => this.nextRound(), this.genInterval)
+		if (!this.isRunning()) {
+			this.running.push(setInterval(() => this.nextRound(), this.genInterval))
 			this.extraRounds = 0
 		}
 	}
 
-	// stop the animation. Only the internal routine should set gameOver to true, as this will advance the queue
-	stop(gameOver = false): void {
-		if (this.running !== null) {
-			const interval = this.running
-			this.running = null
-			clearInterval(interval)
+	stopAll(): void {
+		//debug: console.log(`GameController.stopAll()`)
+		// although there is supposed to be only one interval running at a time, some race condition causes trouble
+		// ... so this will guarantee that all timers are cleared.
+		while (this.running.length > 0) {
+			const timer = this.running.pop()
+			if (timer instanceof WipeEffect) {
+				timer.stop()
+			} else {
+				clearInterval(timer)
+			}
 		}
-		// this could be a "done" callback if we used the same protocol as in wipeEffect
+	}
+
+	// stop the animation. Only the internal routine should set gameOver to true, as this will advance the queue
+	stop(gameCompleted = false): void {
+		//debug: console.log(`GameController.stop(completed=${gameCompleted})`)
+		this.stopAll()
+
+		// the following could be implemented a "done" callback if we used the same protocol as in wipeEffect
 		//  not sure if that would be advantagous...
-		if (gameOver) {
+		if (gameCompleted) {
 			const newShape = this.advanceQueue() // always do this, so it removes the current board
 			if (newShape === null) return // we're done.
 			// ELSE:
 			// start the next item
 			// wait at end of game, then transition in new board, then wait to start next game...
-			this.running = setTimeout(() => {
+			const timeout = setTimeout(() => {
 				// setup transition
-				this.running = null
+				//debug: console.log(`GameController.stop().setup transition`)
+				this.stopAll()
 				const newBoard = this.newBoard(newShape)
 				this.replaceBoard(newBoard, {
 					update: () => {
 						if (this.timerCallback !== null) this.timerCallback(this)
 					},
-					done: () => {
+					done: (aborted) => {
+						//debug: console.log(`GameController.stop().done(aborted=${aborted})`)
+						if (aborted) return
+						// ELSE
 						// setup new game
-						this.running = setTimeout(() => {
-							this.running = null // to ensure game starts
-							this.start(this.timerCallback!)
-						}, this.gameDelay)
+						this.running.push(
+							setTimeout(() => {
+								//debug: console.log(`GameController.stop().done.start new game`)
+								this.stopAll() // to ensure game starts
+								this.start(this.timerCallback!)
+							}, this.gameDelay),
+						)
 					},
 				})
 			}, this.gameDelay)
+			this.running.push(timeout)
 		}
 
 		this.extraRounds = 0
 	}
 
 	singleStep(): void {
-		if (this.running !== null) return // don't interfere when running
+		if (this.isRunning()) return // don't interfere when running
 		this.nextRound()
 	}
 
@@ -280,15 +306,16 @@ export class GameController {
 	}
 
 	// **** TRANSITION ACTIONS: REPLACE, RESET, CLEAR
-	wiper: WipeEffect | null = null
+	//wiper: WipeEffect | null = null
 
 	// wrap internal maintenance around the user-supplied callback
 	wiperCallback(callback: AnimationCallbacks): AnimationCallbacks {
 		return {
-			done: () => {
-				this.wiper = null
+			done: (aborted) => {
+				//debug: console.log(`GameController.wiperCallback.done(aborted=${aborted})`)
+				this.stopAll() // it will call wipeEffect.stop() again, but it's a noop
 				if (callback.done !== undefined) {
-					callback.done()
+					callback.done(aborted)
 				}
 			},
 			update: () => {
@@ -297,35 +324,30 @@ export class GameController {
 				}
 			},
 		}
-		// if (this.wiper !== null && !this.wiper.isRunning()) {
-		// 	// the wipe effect has completed, reset the instance variable:
-		// 	this.wiper = null
-		// }
-		// if (callback != null) callback()
 	}
 
 	isWiping(): boolean {
-		return this.wiper !== null
+		return this.running.some((obj) => obj instanceof WipeEffect)
 	}
 
-	stopTransition(): void {
-		if (this.wiper !== null) {
-			const wipeObject = this.wiper
-			this.wiper = null
-			wipeObject.stop()
-		}
-	}
+	//  use stopAll()...
+	// stopTransition(): void {
+	// 	if (this.wiper !== null) {
+	// 		const wipeObject = this.wiper
+	// 		this.wiper = null
+	// 		wipeObject.stop()
+	// 	}
+	// }
 
 	// replace the current board with a new board, using a wipe effect
 	replaceBoard(fromBoard: Grid, callback: AnimationCallbacks): void {
 		this.generation = 0
 		const toBoard = this.theGame.present
+		this.stopAll()
 		// TODO: we don't really need to set the board, which counts the population
-		if (this.wiper !== null) {
-			this.wiper.stop()
-		}
-		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-		return this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
+		const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+		wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
+		this.running.push(wiper)
 	}
 
 	//  **** RESET ****
@@ -334,13 +356,12 @@ export class GameController {
 		// reset the board to the most recent initial state
 		const toBoard = this.theGame.present
 		const fromBoard = this.theGame.resetBoard()
-		// TODO: we don't really need to set the board, which counts the population
-		if (this.wiper !== null) {
-			this.wiper.stop()
-		}
+		this.stopAll()
 		if (useTransition) {
-			this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
-			this.wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
+			// TODO: we don't really need to set the board, which counts the population
+			const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+			wiper.start(Math.random() < 0.5 ? Wipe.Up : Wipe.Left, this.wiperCallback(callback))
+			this.running.push(wiper)
 		}
 		this.generation = 0
 	}
@@ -354,15 +375,13 @@ export class GameController {
 		const fromBoard = this.theGame.present
 		//eventually just use: this.replaceBoard(fromBoard, callback, direction)
 		this.generation = 0
+		this.stopAll()
 		// if instantaneous:
 		//setBoard(theGame.present)
-		// if shifting in new board:
-		if (this.wiper !== null) {
-			this.wiper.stop()
-		}
-		this.wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
+		const wiper = new WipeEffect(fromBoard, toBoard, (board) => this.theGame.setBoard(board))
 		// Set direction to 0..3 (the default values for enum)
-		this.wiper.start(Math.floor(Math.random() * 4), this.wiperCallback(callback))
+		wiper.start(Math.floor(Math.random() * 4), this.wiperCallback(callback))
+		this.running.push(wiper)
 	}
 
 	//  **** WRAP Checkbox ****

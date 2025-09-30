@@ -135,6 +135,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 	self.setActionDefinitions({
 		startGame: {
 			name: 'Start/Stop (Play/Pause) the Game',
+			description: 'Start or Stop a Game. Note that stopping will also stop a board transition.',
 			options: [
 				{
 					id: 'action',
@@ -159,6 +160,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					action = self.state.isRunning() ? OnOff.Off : OnOff.On
 				}
 				if (action === OnOff.Off) {
+					//debug: console.log(`action.stopGame()`)
 					self.stopGame()
 				} else {
 					self.startGame()
@@ -229,7 +231,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
 				//const theShape = shapes.get(shapeName)
 				const shapeSpec = { shapeName: shapeName, alignment: position, offset: offset }
-				self.state.stop() // just to be safe. "manual" stop() should not affect the queue
+				self.stopGame() // just to be safe. "manual" stop() should not affect the queue
 				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.state.clearShapeQueue()
@@ -240,6 +242,8 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		//============================
 		setShapeQueue: {
 			name: 'Set or Add to Playlist of Shapes',
+			description:
+				'Set or add one or more shapes to the playlist. Uncheck the "Replace Playlist" option to add to the existing playlist.',
 			options: createShapeOptions(self, true), // allow multiple
 			callback: async ({ options }) => {
 				if (options !== undefined && options.category !== undefined) {
@@ -296,6 +300,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		//============================
 		setButtonGrid: {
 			name: 'Set Button Grid Size',
+			description: 'Set the size of the subgrid INSIDE each button.',
 			options: [
 				{
 					id: 'size',
@@ -315,6 +320,8 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		//============================
 		setGridSize: {
 			name: 'Set Full-Board Grid Size',
+			description:
+				"Set the size of the underlying board. Generally it's best to fit to the button grid of your surface.",
 			options: [
 				{
 					id: 'size',
@@ -334,7 +341,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setGameRate: {
-			name: 'Set Game Update Rate',
+			name: 'Set Game Update Rate (Speed)',
 			options: [
 				{
 					id: 'time',
@@ -344,7 +351,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 					min: 1,
 					max: 10,
 					range: true,
-					tooltip: 'Enter the number of generations per second. (Note: 8 may be the actual max)',
+					tooltip: 'Enter the number of generations per second. (Note: 8 may be the actual achievable max)',
 				},
 			],
 			callback: async (event) => {
@@ -381,6 +388,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		//============================
 		setCellCharacters: {
 			name: 'Set Cell Characters',
+			description: 'Choose the style of the grid inside each button.',
 			options: [
 				{
 					id: 'onOffChars',
@@ -400,7 +408,7 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 		},
 		//============================
 		setGameWrap: {
-			name: 'Set Game Board Wrapping',
+			name: 'Set Game Board Wrapping (ADVANCED)',
 			description: 'Wrap the game board so the left edge continues on the right edge, etc. ',
 			options: [
 				{

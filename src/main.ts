@@ -33,13 +33,12 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 
 	// When module gets deleted
 	async destroy(): Promise<void> {
-		this.state.stop() // stop any running game
-		this.state.stopTransition()
+		this.state.stop() // stop any running game or transition
 		this.log('debug', 'destroy')
 	}
 
 	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
-		console.log(`Updating config. Board Size: ${config.boardSize}`)
+		//debug: console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.state.genInterval = Math.round(1000 / config.updateRate)
@@ -69,7 +68,8 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		if (newSizeIsValid && newSizeChanged) {
 			this.boardSize = newBoardSize
 			this.state.setBoardSize(newBoardSize)
-			this.state.resetBoard({}, false) // don't need a callback since we call updateEffects next, and don't animate
+			// this doesn't/shouldn't work with different sizes
+			//this.state.resetBoard({}, false) // don't need a callback since we call updateEffects next, and don't animate
 		}
 		// update the buttons
 		this.updateEfffects()
@@ -160,7 +160,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 				this.stopGame()
 				this.state.replaceBoard(newBoard, {
 					update: () => this.updateEfffects(),
-					done: () => resolve(),
+					done: () => resolve(), // whether aborted or not
 				})
 			} else {
 				resolve()
@@ -173,7 +173,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 			this.stopGame()
 			this.state.clearBoard({
 				update: () => this.updateEfffects(),
-				done: () => resolve(),
+				done: () => resolve(), // whether aborted or not
 			})
 		})
 	}
@@ -184,7 +184,8 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	}
 
 	stopGame(): void {
-		this.state.stop()
+		//debug: console.log(`main.stopGame()`)
+		this.state.stop() // stop game and/or transition
 		this.updateEfffects()
 	}
 }

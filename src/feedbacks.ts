@@ -81,7 +81,7 @@ export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
 				bgcolor: combineRgb(0, 0, 128),
 			},
 			callback: async (_) => {
-				return self.state.isRunning()
+				return self.state.isGameRunning()
 			},
 		},
 		ShuffleEnabled: {

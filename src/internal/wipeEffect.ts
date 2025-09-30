@@ -6,7 +6,7 @@ import { Grid, Wipe } from './grid.js'
 
 export interface AnimationCallbacks {
 	update?: () => void
-	done?: () => void
+	done?: (aborted: boolean) => void
 }
 
 export class WipeEffect {
@@ -20,7 +20,7 @@ export class WipeEffect {
 	callback: AnimationCallbacks = {}
 	fromIdx = 0
 	shifting: NodeJS.Timeout | null = null
-	controller = new AbortController() // a place-holder
+	//controller = new AbortController() // a place-holder
 
 	// setBoard sets the internal representation of the board since we don't modify the original toBoard
 	constructor(fromBoard: Grid, toBoard: Grid, setBoard: (toBoard: Grid) => void) {
@@ -30,7 +30,8 @@ export class WipeEffect {
 	}
 
 	start(direction: Wipe, callbacks: AnimationCallbacks, rate = this.frameRate): void {
-		this.stop()
+		//debug: console.log(`wipeEffects.start()`)
+		this.stop(false) // abort any current transition
 		this.shiftDir = direction
 		this.frameRate = rate
 		this.fromIdx = 0
@@ -47,13 +48,15 @@ export class WipeEffect {
 		this.shifting = setInterval(() => this.shiftOne(), this.frameRate)
 	}
 
-	stop(): void {
+	// stop current wipe. Generally if a client is calling stop(), the abort argument should be left as false
+	stop(completed = false): void {
+		//debug: (`wipeEffects.stop(completed=${completed})`)
 		if (this.shifting !== null) {
 			const interval = this.shifting
 			this.shifting = null
 			clearInterval(interval)
 			if (this.callback.done !== undefined) {
-				this.callback.done()
+				this.callback.done(!completed)
 			}
 		}
 	}
@@ -81,7 +84,7 @@ export class WipeEffect {
 				break
 		}
 		if (!isShifting) {
-			this.stop()
+			this.stop(true) // signal a "normal" stop (not aborting)
 		}
 		if (this.callback.update !== undefined) {
 			this.callback.update()

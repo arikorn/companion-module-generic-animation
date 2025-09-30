@@ -89,47 +89,44 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		await this.configUpdated(newConfig)
 	}
 
-	setRandomize(enable: boolean): void {
-		this.state.randomizeQueue = enable
-		this.saveConfig({ ...this.config, randomize: enable })
-		this.updateEfffects()
+	async setRandomize(enable: boolean): Promise<void> {
+		const newConfig = { ...this.config, randomize: enable }
+		this.saveConfig(newConfig)
+		await this.configUpdated(newConfig) // ensure that local state is updated too
 	}
 
-	setRepeat(enable: boolean): void {
-		this.state.repeatQueue = enable
-		this.saveConfig({ ...this.config, repeat: enable })
-		this.updateEfffects()
+	async setRepeat(enable: boolean): Promise<void> {
+		const newConfig = { ...this.config, repeat: enable }
+		this.saveConfig(newConfig)
+		await this.configUpdated(newConfig) // ensure that local state is updated too
 	}
 
-	setGenerationRate(rate: number): void {
-		const running = this.state.isRunning()
+	async setGenerationRate(rate: number): Promise<void> {
+		const running = this.state.isGameRunning()
 		const newConfig = { ...this.config, updateRate: rate }
 		this.saveConfig(newConfig) // this does not trigger configUpdated
 		this.stopGame()
-		this.state.genInterval = Math.round(1000 / newConfig.updateRate)
-		this.config = newConfig
-		this.updateEfffects() // in case we define a variable for generation rae
+		await this.configUpdated(newConfig) // ensure that local state is updated too
 		if (running) {
 			this.startGame()
 		}
 	}
 
-	setOnfOffChars(onOffChars: string): void {
+	async setOnfOffChars(onOffChars: string): Promise<void> {
 		if (this.config.onOffChars !== onOffChars) {
 			this.on = onOffChars[0]
 			this.off = onOffChars[1]
 			this.config.onOffChars = onOffChars
 			this.saveConfig(this.config)
 			// update the buttons
-			this.updateEfffects()
+			await this.configUpdated(this.config)
 		}
 	}
 
-	setWrap(enable: boolean): void {
-		this.state.setWrap(enable)
+	async setWrap(enable: boolean): Promise<void> {
 		const newConfig = { ...this.config, wrap: enable }
 		this.saveConfig(newConfig) // this does not trigger configUpdated
-		this.updateEfffects() // in case we define a variable for wrapping
+		await this.configUpdated(this.config)
 	}
 
 	// Return config fields for web config

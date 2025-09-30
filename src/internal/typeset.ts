@@ -11,10 +11,10 @@ export function typeset(text: string): number[][] {
 			line += 7
 			continue
 		}
-		const letter = letters.get(c.toUpperCase())
+		let letter = letters.get(c.toUpperCase())
 		if (letter === undefined) {
-			console.log(`Unknown letter: '${c}' in:\n'${text}'`)
-			continue
+			console.log(`Unknown letter: '${c}' in:\n'${text}'. Substituting "_"`)
+			letter = '_'
 		}
 		for (let idx = line; idx < result.length; idx++) {
 			if (result[idx].length > 0) {
@@ -32,6 +32,14 @@ letters.set(' ', [
 	[0, 0],
 	[0, 0],
 	[0, 0],
+])
+
+letters.set('_', [
+	[0, 0],
+	[0, 0],
+	[0, 0],
+	[0, 0],
+	[1, 1],
 ])
 
 letters.set("'", [[1], [1], [0], [0], [0]])

@@ -1,12 +1,14 @@
 import { WipeEffect, AnimationCallbacks } from './wipeEffect.js'
 import { Coord, Grid, Wipe } from './grid.js'
 import { GameOfLife } from './conway.js'
-import { getShapeExtent, shapeArrayToGrid, shapes } from './shapes.js' //shapesByCategory, transpose
+import { getShapeExtent, shapeArrayToGrid, shapeFromBitmap, shapes } from './shapes.js' //shapesByCategory, transpose
 import { randomOrder } from './utilities.js'
-interface BoardQueueItem {
-	shapeName: string
+import { typeset } from './typeset.js'
+export interface BoardQueueItem {
+	shapeName: string | Coord[]
 	alignment: string
 	offset: Coord
+	text?: string
 	boardSize?: Coord
 }
 
@@ -188,7 +190,15 @@ export class GameController {
 			return newBoard
 		} // ELSE
 		const { shapeName, alignment, offset } = shapeSpec
-		const theShape = shapes.get(shapeName)! // we don't allow custom values
+		let theShape: Coord[]
+		if (shapeName === 'text') {
+			theShape = shapeFromBitmap(typeset(shapeSpec.text!))
+		} else if (typeof shapeName === 'string') {
+			theShape = shapes.get(shapeName)! // we don't allow custom values
+		} else {
+			// must be Coord[]
+			theShape = shapeName
+		}
 		const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
 		const boardSize = this.getBoardSize()
 		const midBoard = { y: Math.round(boardSize.y / 2), x: Math.round(boardSize.x / 2) }
@@ -218,6 +228,8 @@ export class GameController {
 				topLeft = { y: midBoard.y - midShape.y, x: boardSize.x - (shapeExt[1].x - shapeExt[0].x) - 1 }
 				break
 			}
+			case 'none':
+				break
 		}
 		if (!isNaN(offset.x)) {
 			topLeft.x += offset.x

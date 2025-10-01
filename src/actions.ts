@@ -5,9 +5,10 @@ import {
 	CompanionInputFieldMultiDropdown,
 } from '@companion-module/base'
 import type { LowresScreensaverInstance } from './main.js'
-//import { Grid } from './internal/grid.js'
+import { BoardQueueItem } from './animation/controller.js'
 import { shapes, shapesByCategory } from './animation/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
+import { readPNG } from './animation/utilities.js'
 
 // Make the menu choices from the keys of the map.
 //  If category is specified, filter for a particular category (uses the global variable shapesByCategory)
@@ -15,12 +16,14 @@ function makeChoicesFromMap(strMap: Map<string, any>, category: string | null = 
 	const keys = Array.from(strMap.keys()).filter((val) =>
 		category === null ? true : shapesByCategory.get(category)!.includes(val),
 	)
-	return keys.sort().map((val) => ({ id: val, label: val }))
+	const choices = keys.sort().map((val) => ({ id: val, label: val }))
+	return choices
 }
 
 // make one menu for each category
 function categoryMenus(allowMultiple = false): CompanionInputFieldDropdown[] | CompanionInputFieldMultiDropdown[] {
 	const categories = Array.from(shapesByCategory.keys())
+
 	// note: TypeScript objected to `type: allowMultiple ? 'multidropdown' : 'dropdown', so this is slightly more wordy
 	if (allowMultiple) {
 		return categories.map((category) => {
@@ -55,10 +58,17 @@ function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = fal
 			id: 'category',
 			type: 'dropdown',
 			label: 'Select Category',
-			choices: [...makeChoicesFromMap(shapesByCategory)],
+			choices: [{ id: 'Custom_text', label: 'Custom text' }, ...makeChoicesFromMap(shapesByCategory)],
 			default: 'continuous',
 		},
 		...categoryMenus(allowMultiple),
+		{
+			id: 'Custom_text',
+			type: 'textinput',
+			label: 'Text message:',
+			default: '',
+			isVisibleExpression: `$(options:category) === "Custom_text"`,
+		},
 		{
 			id: 'pos',
 			type: 'dropdown',
@@ -223,20 +233,66 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			options: createShapeOptions(self),
 			callback: async (event) => {
 				const category = event.options?.category
-				const shapeName = event.options?.[category as string] as string
+				let shapeName: string
+				if (category === 'Custom_text') {
+					shapeName = 'text'
+				} else {
+					shapeName = event.options?.[category as string] as string
+				}
 				if (shapeName === undefined || shapeName === null) {
 					return
 				}
 				const position = event.options.pos as string
 				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
 				//const theShape = shapes.get(shapeName)
-				const shapeSpec = { shapeName: shapeName, alignment: position, offset: offset }
+				const shapeSpec = { shapeName: shapeName, alignment: position, offset: offset } as BoardQueueItem
+				if (shapeName === 'text') {
+					shapeSpec.text = event.options.Custom_text as string
+				}
 				self.stopGame() // just to be safe. "manual" stop() should not affect the queue
 				// replace the queue with the current shape. (This allows it to be played on repeat, for example.)
 				//  and also allows other shapes to be queued without removing this shape from the board.
 				self.animation.clearShapeQueue()
 				self.animation.pushShapeQueue([shapeSpec])
 				await self.replaceBoard(self.animation.newBoard(shapeSpec))
+			},
+		},
+		//============================
+		setShapeFromPNG: {
+			name: 'Load Custom Shape (PNG)',
+			options: [
+				{
+					id: 'filename',
+					type: 'textinput',
+					label: 'Filename:',
+					default: '',
+				},
+				{
+					id: 'threshold',
+					type: 'number',
+					label: 'Brightness Threshold',
+					default: -1,
+					min: -1,
+					max: 255,
+					range: true,
+					tooltip: 'Enter the threshold for converting grayscale images to bitmaps. Use -1 for an automated best-guess',
+				},
+			],
+			callback: async ({ options }) => {
+				const filename = options.filename as string
+				const threshold = options.threshold as number
+				try {
+					const coords = readPNG(filename, threshold, self.animation.getBoardSize())
+					const shapeSpec = { shapeName: coords, alignment: 'none', offset: { x: 0, y: 0 } } as BoardQueueItem
+					self.stopGame() // just to be safe.
+					self.animation.clearShapeQueue()
+					self.animation.pushShapeQueue([shapeSpec])
+					await self.replaceBoard(self.animation.newBoard(shapeSpec))
+				} catch (error) {
+					console.error('Error reading PNG file:' + filename, error)
+					// throw error
+					// TODO? could have a feedback triggered on error and/or a variable...
+				}
 			},
 		},
 		//============================
@@ -248,18 +304,27 @@ export function UpdateActions(self: LowresScreensaverInstance): void {
 			callback: async ({ options }) => {
 				if (options !== undefined && options.category !== undefined) {
 					const category = String(options.category)
-					if (options[category] !== undefined) {
-						const shapes = options[category] as string[]
-						const position = options.pos as string
-						const offset = { x: Number(options.xOffset), y: Number(options.yOffset) }
-						const elements = shapes.map((shape) => ({ shapeName: shape, alignment: position, offset: offset }))
-						const replace = options.replace as boolean
-						if (replace) {
-							self.animation.clearShapeQueue()
-						}
-						// replace the board, or noop if pushShapeQueue returns null (queue was not empty)
-						await self.replaceBoard(self.animation.pushShapeQueue(elements))
+					let shapeNames: string[]
+					if (category === 'Custom_text') {
+						shapeNames = ['text']
+					} else {
+						shapeNames = options[category] as string[]
 					}
+					const usertext = options.Custom_text as string
+					const position = options.pos as string
+					const offset = { x: Number(options.xOffset), y: Number(options.yOffset) }
+					const elements = shapeNames.map((shape) => ({
+						shapeName: shape,
+						alignment: position,
+						offset: offset,
+						text: usertext,
+					}))
+					const replace = options.replace as boolean
+					if (replace) {
+						self.animation.clearShapeQueue()
+					}
+					// replace the board, or noop if pushShapeQueue returns null (queue was not empty)
+					await self.replaceBoard(self.animation.pushShapeQueue(elements))
 				}
 			},
 		},

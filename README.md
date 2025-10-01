@@ -1,8 +1,8 @@
-# companion-module-generic-lowres-screensaver
+# companion-module-generic-animation
 
 # Introduction
 
-This module implements a low-resolution "screensaver" in Companion that allows you to use all the buttons of a
+This module implements a low-resolution "screensaver" animation module in Companion that allows you to use all the buttons of a
 surface as a unified screen for animations. The low-resolution comes from the "pixels" being generated from glyphs for filled and open squares. In other words, this module "draws" by setting the button text to a segment of an underlying grid.
 
 Internally, the program maintains a standard grid (class Grid) on which it can draw. Externally, the central UI element is a single feedback which checks where the button is and sets it text to a rectangular subspace of the underlying grid. One can visualize the entire grid by putting this same feedback in a sufficient number of buttons.

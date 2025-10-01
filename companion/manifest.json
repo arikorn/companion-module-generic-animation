@@ -1,12 +1,12 @@
 {
-	"id": "generic-lowres-screensaver",
-	"name": "generic-lowres-screensaver",
-	"shortname": "lowres-screensaver",
-	"description": "A low-resolution screensaver using font glyphs for pixels and featuring Conway's Game of Life.",
+	"id": "generic-animation",
+	"name": "generic-animation",
+	"shortname": "animation",
+	"description": "A low-resolution animation/screensaver featuring Conway's Game of Life.",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-generic-lowres-screensaver.git",
-	"bugs": "https://github.com/bitfocus/companion-module-generic-lowres-screensaver/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-generic-animation.git",
+	"bugs": "https://github.com/bitfocus/companion-module-generic-animation/issues",
 	"maintainers": [
 		{
 			"name": "Ari Kornfeld",
@@ -21,15 +21,17 @@
 	},
 	"legacyIds": [],
 	"manufacturer": "Generic",
-	"products": ["Lowres-Screensaver"],
+	"products": ["animation"],
 	"keywords": [
 		"screeensaver",
 		"screen-saver",
 		"game-of-life",
 		"conway",
 		"idle-screen",
+		"lock-screen",
 		"animation",
 		"lowres",
+		"low resolution",
 		"generic"
 	]
 }

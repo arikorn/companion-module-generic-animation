@@ -1,6 +1,6 @@
-import type { LowresScreensaverInstance } from './main.js'
+import type { AnimationInstance } from './main.js'
 
-export function UpdateVariableDefinitions(self: LowresScreensaverInstance): void {
+export function UpdateVariableDefinitions(self: AnimationInstance): void {
 	self.setVariableDefinitions([
 		{ variableId: 'generation', name: 'Game of Life: generation' },
 		{ variableId: 'population', name: 'Game of Life: population' },
@@ -10,7 +10,7 @@ export function UpdateVariableDefinitions(self: LowresScreensaverInstance): void
 	])
 }
 
-export function updateVariableValues(self: LowresScreensaverInstance): void {
+export function updateVariableValues(self: AnimationInstance): void {
 	self.setVariableValues({
 		generation: self.animation.getGeneration(),
 		population: self.animation.getPopulation(),

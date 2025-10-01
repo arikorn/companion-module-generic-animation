@@ -4,7 +4,7 @@ import {
 	CompanionInputFieldDropdown,
 	CompanionInputFieldMultiDropdown,
 } from '@companion-module/base'
-import type { LowresScreensaverInstance } from './main.js'
+import type { AnimationInstance } from './main.js'
 import { BoardQueueItem } from './animation/controller.js'
 import { shapes, shapesByCategory } from './animation/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
@@ -52,7 +52,7 @@ function categoryMenus(allowMultiple = false): CompanionInputFieldDropdown[] | C
 	}
 }
 
-function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = false): SomeCompanionActionInputField[] {
+function createShapeOptions(self: AnimationInstance, allowMultiple = false): SomeCompanionActionInputField[] {
 	return [
 		{
 			id: 'category',
@@ -117,7 +117,7 @@ function createShapeOptions(self: LowresScreensaverInstance, allowMultiple = fal
 // at some point we can either convert this file to a class
 //const currentFilter = new Map<string, string>()
 
-// function myFilter(options:CompanionOptionValues, self: LowresScreensaverInstance): boolean {
+// function myFilter(options:CompanionOptionValues, self: AnimationInstance): boolean {
 // 	const category = event.options.category as string
 // 	if (!currentFilter.has(event.id)) {
 // 		currentFilter.set(event.id, category)
@@ -141,7 +141,7 @@ const onOffChoices = [
 	{ id: OnOff.Toggle, label: 'Toggle' },
 ]
 
-export function UpdateActions(self: LowresScreensaverInstance): void {
+export function UpdateActions(self: AnimationInstance): void {
 	self.setActionDefinitions({
 		startGame: {
 			name: 'Start/Stop (Play/Pause) the Game',

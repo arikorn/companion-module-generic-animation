@@ -1541,9 +1541,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"generic-lowres-screensaver@workspace:.":
+"generic-animation@workspace:.":
   version: 0.0.0-use.local
-  resolution: "generic-lowres-screensaver@workspace:."
+  resolution: "generic-animation@workspace:."
   dependencies:
     "@companion-module/base": "npm:~1.12.1"
     "@companion-module/tools": "npm:^2.3.0"

@@ -2,7 +2,7 @@ import { type SomeCompanionConfigField } from '@companion-module/base' //Regex,
 import { DropdownChoiceId, DropdownChoice } from '@companion-module/base'
 import { Coord } from './animation/grid.js'
 
-export interface LowresScreensaverConfig {
+export interface AnimationConfig {
 	buttonGrid: string
 	boardSize: string
 	randomize: boolean

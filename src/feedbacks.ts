@@ -1,7 +1,7 @@
 import { combineRgb } from '@companion-module/base'
-import type { LowresScreensaverInstance } from './main.js'
+import type { AnimationInstance } from './main.js'
 
-export function UpdateFeedbacks(self: LowresScreensaverInstance): void {
+export function UpdateFeedbacks(self: AnimationInstance): void {
 	self.setFeedbackDefinitions({
 		Conway: {
 			type: 'advanced',

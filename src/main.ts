@@ -1,13 +1,13 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, cellCharChoices, configSizeToCoord, type LowresScreensaverConfig } from './config.js'
+import { GetConfigFields, cellCharChoices, configSizeToCoord, type AnimationConfig } from './config.js'
 import { UpdateVariableDefinitions, updateVariableValues } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GameController } from './animation/controller.js'
 import { Coord, Grid } from './animation/grid.js'
-export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverConfig> {
-	config!: LowresScreensaverConfig // Setup in init()
+export class AnimationInstance extends InstanceBase<AnimationConfig> {
+	config!: AnimationConfig // Setup in init()
 
 	animation: GameController
 	buttonGrid: Coord = { x: 11, y: 10 } // value is just a placeholder
@@ -20,7 +20,7 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.animation = new GameController(this.boardSize)
 	}
 
-	async init(config: LowresScreensaverConfig): Promise<void> {
+	async init(config: AnimationConfig): Promise<void> {
 		await this.configUpdated(config)
 
 		this.updateStatus(InstanceStatus.Ok)
@@ -37,14 +37,14 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 		this.log('debug', 'destroy')
 	}
 
-	async configUpdated(config: LowresScreensaverConfig): Promise<void> {
+	async configUpdated(config: AnimationConfig): Promise<void> {
 		//debug: console.log(`Updating config. Board Size: ${config.boardSize}`)
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.animation.genInterval = Math.round(1000 / config.updateRate)
 		if (!('repeat' in config)) {
 			// needed only for development, the first time the prop is added
-			config = { ...(config as LowresScreensaverConfig), repeat: false }
+			config = { ...(config as AnimationConfig), repeat: false }
 			this.saveConfig(config)
 		}
 		this.animation.randomizeQueue = config.randomize
@@ -187,4 +187,4 @@ export class LowresScreensaverInstance extends InstanceBase<LowresScreensaverCon
 	}
 }
 
-runEntrypoint(LowresScreensaverInstance, UpgradeScripts)
+runEntrypoint(AnimationInstance, UpgradeScripts)

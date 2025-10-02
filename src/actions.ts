@@ -283,7 +283,7 @@ export function UpdateActions(self: AnimationInstance): void {
 				const threshold = options.threshold as number
 				try {
 					const coords = readPNG(filename, threshold, self.animation.getBoardSize())
-					const shapeSpec = { shapeName: coords, alignment: 'none', offset: { x: 0, y: 0 } } as BoardQueueItem
+					const shapeSpec = { shapeName: coords, alignment: 'center', offset: { x: 0, y: 0 } } as BoardQueueItem
 					self.stopGame() // just to be safe.
 					self.animation.clearShapeQueue()
 					self.animation.pushShapeQueue([shapeSpec])

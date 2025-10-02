@@ -1,13 +1,46 @@
-# Low-Res "Screensaver" & Conway's Game of Life
+# Animation Module: Low-Res "Screensaver" & Conway's Game of Life
 
 This module implements a low-resolution "screensaver" in Companion that allows you to treat all the buttons of a
 surface as a unified screen for animations.
 
-Currently implemented are simple wipe transitions in the four cardinal directions and...
+Currently implemented are simple wipe transitions in the four cardinal directions and Conway's Game of Life (see description later)
+
+## Loading a Dev Module
+
+1. Choose a folder for dev modules
+2. In the Companion launch window click on the cog in the upper-right and set the "Developer module path" to the folder chosen in step 1. (If using v4.1 or later, make sure it is also enabled.)
+3. Download the module and unzip it into that folder (the module should be a subfolder of the dev module path)
+
+The module will now show up in the **_Connections_** tab (but not in the Modules page, since it is not yet part of the official set of Companion modules).
+
+## GETTING STARTED
+
+1. In the **Connections** page select the "Total Board Size" that fits your surface. (We strongly recommend using the "fit to" options)
+   -- be sure to click **_Save_**!
+2. Go the **Buttons** page and choose a page to use for the animation screen
+3. Go to the **_Presets_** tab on the right side of the **Buttons** page and elect the **animation** group (i.e. this module)
+4. Select the **_Grid Button!_** group: it has only one button: drag it onto the board.
+   4a. Optional: if using as a scrrensaver, you can add the action "Surface: Set to page" and set it to "back".
+   4b. then copy it (ctrl-C/cmd-C) and then paste it (ctrl-V/cmd-V) to all the buttons on the page. (Or just drag the preset repeatedly.)
+5. On a different page, set up the remaining presets, particularly the buttons from **_Board Content_**
+
+Select a playlist, decide whether to play on repeat and/or shuffle, then go to the "game" page and press any button to start/pause the game! (If you set the screensaver mode, pressing the button may take you away from the page, so you may need to start it on the settings page.)
+
+Setting up a screensaver:
+
+- one trigger to set the timeout
+- one trigger to switch to page on timeout and start game
+
+TIPS:
+
+- In the game status buttons "Gen" stands for "generation" (number of turns) and "Pop" stands for "population" (the number of "live" cells). See below for details.
+- You can "hide" some actions in any of the game buttons, such as changing speed or playlists
+- You don't have to set _every_ button to the grid display -- the "missing" buttons will just be ignored.
+- ...for example, you can dedicate one button to the game statistics. (Or using fancy logic, have it flash on once every few seconds).
 
 ## Conway's Game of Life
 
-This project implements Conway's Game of Life with or without wrap-around (i.e. the bottom continues back at the top, and the sides are likewise connected).
+This project implements Conway's Game of Life on a wrap-around board(i.e. the bottom continues back at the top, and the sides are likewise connected).
 
 While no knowledge of how the game works it required, it makes it more interesting to know how all the complexity arises from three simple rules: The basic idea of Conway's Game of Life is a very simple population simulation. On each turn (generation), every cell in a grid is evaluated for how many of its neighbors are "alive" (or "on"). The next generation is computed using three simple rules:
 

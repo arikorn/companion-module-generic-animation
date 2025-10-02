@@ -6,6 +6,7 @@ import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GameController } from './animation/controller.js'
 import { Coord, Grid } from './animation/grid.js'
+import { getPreset } from './presets.js'
 export class AnimationInstance extends InstanceBase<AnimationConfig> {
 	config!: AnimationConfig // Setup in init()
 
@@ -29,6 +30,7 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 		this.updateFeedbacks() // export feedbacks
 		this.updateVariableDefinitions() // export variable definitions
 		this.updateEfffects() // not sure if it's necessary after updating variables...
+		this.updatePresets() // export preset definitions
 	}
 
 	// When module gets deleted
@@ -144,6 +146,10 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 
 	updateVariableDefinitions(): void {
 		UpdateVariableDefinitions(this)
+	}
+
+	updatePresets(): void {
+		this.setPresetDefinitions(getPreset(this))
 	}
 
 	updateEfffects(): void {

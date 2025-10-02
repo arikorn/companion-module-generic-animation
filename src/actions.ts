@@ -70,7 +70,7 @@ function createShapeOptions(self: AnimationInstance, allowMultiple = false): Som
 			isVisibleExpression: `$(options:category) === "Custom_text"`,
 		},
 		{
-			id: 'pos',
+			id: 'alignment',
 			type: 'dropdown',
 			label: 'Placement',
 			choices: [
@@ -108,7 +108,7 @@ function createShapeOptions(self: AnimationInstance, allowMultiple = false): Som
 			label: 'Replace playlist',
 			tooltip: 'Replace the current playlist with the selected items.',
 			default: true,
-			isVisibleExpression: `true === ${allowMultiple}`,
+			//isVisibleExpression: `true === ${allowMultiple}`,
 		},
 	]
 }
@@ -129,7 +129,7 @@ function createShapeOptions(self: AnimationInstance, allowMultiple = false): Som
 // 	return true
 // }
 
-const enum OnOff {
+export const enum OnOff {
 	Off = 0,
 	On = 1,
 	Toggle = -1,
@@ -201,7 +201,7 @@ export function UpdateActions(self: AnimationInstance): void {
 			},
 		},
 		//============================
-		setRandomOrder: {
+		setShuffle: {
 			name: 'Enable Shuffle',
 			description: 'Choose whether or not to play the playlist in random order (shuffle).',
 			options: [
@@ -242,10 +242,10 @@ export function UpdateActions(self: AnimationInstance): void {
 				if (shapeName === undefined || shapeName === null) {
 					return
 				}
-				const position = event.options.pos as string
+				const alignment = event.options.alignment as string
 				const offset = { x: Number(event.options.xOffset), y: Number(event.options.yOffset) }
 				//const theShape = shapes.get(shapeName)
-				const shapeSpec = { shapeName: shapeName, alignment: position, offset: offset } as BoardQueueItem
+				const shapeSpec = { shapeName: shapeName, alignment: alignment, offset: offset } as BoardQueueItem
 				if (shapeName === 'text') {
 					shapeSpec.text = event.options.Custom_text as string
 				}
@@ -311,11 +311,11 @@ export function UpdateActions(self: AnimationInstance): void {
 						shapeNames = options[category] as string[]
 					}
 					const usertext = options.Custom_text as string
-					const position = options.pos as string
+					const alignment = options.alignment as string
 					const offset = { x: Number(options.xOffset), y: Number(options.yOffset) }
 					const elements = shapeNames.map((shape) => ({
 						shapeName: shape,
-						alignment: position,
+						alignment: alignment,
 						offset: offset,
 						text: usertext,
 					}))

@@ -2,6 +2,7 @@ import { type SomeCompanionConfigField } from '@companion-module/base' //Regex,
 import { DropdownChoiceId, DropdownChoice } from '@companion-module/base'
 import { Coord } from './animation/grid.js'
 
+// see defaults definition below
 export interface AnimationConfig {
 	buttonGrid: string
 	boardSize: string
@@ -10,6 +11,7 @@ export interface AnimationConfig {
 	updateRate: number
 	wrap: boolean
 	onOffChars: string // two (or three?) character representing on, off, (and no-cell)
+	showAdvancedConfig: boolean
 }
 
 // columns, rows
@@ -91,6 +93,31 @@ export function boardSizeDefault(): DropdownChoiceId {
 	return boardSizeChoices()[0].id
 }
 
+// this can be used to "dynamically" update existing configs
+const defaultConfig: AnimationConfig = {
+	buttonGrid: buttonSizeDefault() as string,
+	boardSize: boardSizeDefault() as string,
+	randomize: true,
+	repeat: true,
+	updateRate: 4,
+	wrap: true,
+	onOffChars: cellCharChoices[0].id,
+	showAdvancedConfig: false,
+}
+
+export function updateConfig(config: AnimationConfig): boolean {
+	let updated = false
+	for (const key in defaultConfig) {
+		if (!(key in config)) {
+			// a bit of contortion to get past TypeScript errors "expression of type 'string' can't be used to index type 'AnimationConfig'."
+			const obj = { [key]: defaultConfig[key as keyof AnimationConfig] }
+			Object.assign(config, obj)
+			updated = true
+		}
+	}
+	return updated
+}
+
 export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
@@ -99,7 +126,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'Enable Repeat',
 			tooltip: 'When enabled, loop the playlist continuously.',
 			width: 4,
-			default: false,
+			default: defaultConfig.repeat,
 		},
 		{
 			type: 'checkbox',
@@ -107,7 +134,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'Enable Shuffle',
 			tooltip: 'Determine whether the playlist of board configurations should be played in random order.',
 			width: 4,
-			default: false,
+			default: defaultConfig.randomize,
 		},
 		{
 			type: 'dropdown',
@@ -117,27 +144,29 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 				'Specify the size of the button grid ("fit to WxH") or the number of cells in the board (width x height). The board may be larger or smaller than the size allowed by the number of buttons times the button-grid size.',
 			width: 9,
 			choices: boardSizeChoices(),
-			default: boardSizeDefault(),
+			default: defaultConfig.boardSize,
 			allowCustom: true,
 		},
 		{
 			type: 'dropdown',
 			id: 'buttonGrid',
-			label: 'Grid Size INSIDE each button',
+			label: 'ADVANCED: Grid Size INSIDE each button',
 			tooltip: 'Specify the size of the subgrid (width x height) shown on a button.',
 			width: 9,
 			choices: buttonSizeChoices(),
-			default: buttonSizeDefault(),
+			default: defaultConfig.buttonGrid,
+			isVisibleExpression: `$(options:showAdvancedConfig)`,
 		},
 		{
 			type: 'number',
 			id: 'updateRate',
-			label: 'Game update rate (rounds/second)',
+			label: 'ADVANCED: Game update rate (rounds/second)',
 			tooltip: 'Specify have many generations are computed each second.',
 			width: 9,
 			min: 1,
 			max: 10, // note: currently the achievable max appears to be 8 Hz
-			default: 5,
+			default: defaultConfig.updateRate,
+			isVisibleExpression: `$(options:showAdvancedConfig)`,
 		},
 		{
 			type: 'dropdown',
@@ -147,7 +176,8 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 				'Specify the pair of characters to represent cells that are, respectively, "on" (live) and "off" (dead).\nNote that the colors are reversed here and the relative scales are misleading',
 			width: 9,
 			choices: cellCharChoices,
-			default: cellCharChoices[0].id,
+			default: defaultConfig.onOffChars,
+			isVisibleExpression: `$(options:showAdvancedConfig)`,
 		},
 		{
 			type: 'checkbox',
@@ -156,7 +186,15 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			tooltip:
 				'If "on", the board continues on the opposite sides. Generally, leaving "wrap" on is more interesting, except for very small boards (like 5x3).',
 			width: 9,
-			default: true,
+			default: defaultConfig.wrap,
+			isVisibleExpression: `$(options:showAdvancedConfig)`,
+		},
+		{
+			type: 'checkbox',
+			id: 'showAdvancedConfig',
+			label: 'Show advanced config options',
+			width: 9,
+			default: defaultConfig.wrap,
 		},
 	]
 }

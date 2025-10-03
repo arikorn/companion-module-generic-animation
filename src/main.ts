@@ -1,5 +1,5 @@
 import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
-import { GetConfigFields, cellCharChoices, configSizeToCoord, type AnimationConfig } from './config.js'
+import { GetConfigFields, cellCharChoices, configSizeToCoord, updateConfig, type AnimationConfig } from './config.js'
 import { UpdateVariableDefinitions, updateVariableValues } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
@@ -46,14 +46,14 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 
 	async configUpdated(config: AnimationConfig): Promise<void> {
 		//debug: console.log(`Updating config. Board Size: ${config.boardSize}`)
+		// first make sure the config is complete (i.e. auto-update for new config features)
+		if (updateConfig(config)) {
+			console.log('Adding missing config properties')
+			this.saveConfig(config)
+		}
 		this.stopGame() // perhaps a bit conservative but simplifies board size and wrap changes
 		this.buttonGrid = configSizeToCoord(config.buttonGrid)
 		this.animation.genInterval = Math.round(1000 / config.updateRate)
-		if (!('repeat' in config)) {
-			// needed only for development, the first time the prop is added
-			config = { ...(config as AnimationConfig), repeat: false }
-			this.saveConfig(config)
-		}
 		this.animation.randomizeQueue = config.randomize
 		this.animation.repeatQueue = config.repeat
 		this.on = config.onOffChars[0]

@@ -125,13 +125,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 		name: 'Set Playlist Repeat',
 		type: 'button',
 		style: {
-			text: 'Enable Repeat',
-			size: 'auto',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
-		},
-		previewStyle: {
-			text: 'Toggle Repeat',
+			text: '🔁\\nRepeat', // 0x1F501
 			size: 'auto',
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
@@ -141,9 +135,8 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 				feedbackId: 'RepeatEnabled',
 				options: {},
 				style: {
-					text: 'Disable Repeat',
 					color: combineRgb(0, 0, 0),
-					bgcolor: combineRgb(146, 146, 0),
+					bgcolor: combineRgb(202, 96, 0),
 				},
 			},
 		],
@@ -167,13 +160,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 		name: 'Set Playlist Shuffle',
 		type: 'button',
 		style: {
-			text: 'Enable Shuffle',
-			size: 'auto',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
-		},
-		previewStyle: {
-			text: 'Toggle Shuffle',
+			text: '🔀\uFE0E\\nShuffle', // renders poorly '🔀', and doesn't honor the variation selector.
 			size: 'auto',
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
@@ -183,9 +170,8 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 				feedbackId: 'ShuffleEnabled',
 				options: {},
 				style: {
-					text: 'Disable Shuffle',
 					color: combineRgb(0, 0, 0),
-					bgcolor: combineRgb(146, 146, 0),
+					bgcolor: combineRgb(202, 96, 0),
 				},
 			},
 		],
@@ -206,7 +192,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 
 	presets.setGameRate = {
 		category: ' Game Settings',
-		name: 'Set Update Rate',
+		name: 'Set Update Rate Example',
 		type: 'button',
 		style: {
 			text: 'Set Update Rate to 4',

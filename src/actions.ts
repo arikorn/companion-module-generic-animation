@@ -430,6 +430,8 @@ export function UpdateActions(self: AnimationInstance): void {
 		//============================
 		setGameDelay: {
 			name: 'Set the delay between games in the playlist',
+			description:
+				'Set the number of ms to wait after the game is finished and after shifting in the next board in the playlist before starting.',
 			options: [
 				{
 					id: 'time',
@@ -444,9 +446,33 @@ export function UpdateActions(self: AnimationInstance): void {
 			],
 			callback: async (event) => {
 				const delay = Number(event.options.time)
-				if (!isNaN(delay)) {
-					// enforce the range
+				if (!isNaN(delay) && delay > 0) {
 					self.animation.gameDelay = delay
+				}
+			},
+		},
+		//============================
+		setIdleTimer: {
+			name: 'Set the idle timer',
+			description:
+				'Set a timer for the specified time. ' +
+				'Typically a Trigger is set up with this action resetting the timeout on button presses. A second Trigger start a screensaver if the timeout expires.',
+			options: [
+				{
+					id: 'time',
+					type: 'number',
+					label: 'Idle Timeout (minutes)',
+					default: 5.0,
+					min: 1.0,
+					max: 60.0,
+					range: true,
+					tooltip: 'Enter the number of minutes before the timer set the "timeout" state.',
+				},
+			],
+			callback: async (event) => {
+				const minutes = Number(event.options.time)
+				if (!isNaN(minutes) && minutes > 0) {
+					self.setIdleTimeout(minutes)
 				}
 			},
 		},

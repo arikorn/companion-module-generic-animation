@@ -5,14 +5,6 @@ surface as a unified screen for animations.
 
 Currently implemented are simple wipe transitions in the four cardinal directions and Conway's Game of Life (see description later)
 
-## Loading a Dev Module
-
-1. Choose a folder for dev modules
-2. In the Companion launch window click on the cog in the upper-right and set the "Developer module path" to the folder chosen in step 1. (If using v4.1 or later, make sure it is also enabled.)
-3. Download the module and unzip it into that folder (the module should be a subfolder of the dev module path)
-
-The module will now show up in the **_Connections_** tab (but not in the Modules page, since it is not yet part of the official set of Companion modules).
-
 ## GETTING STARTED
 
 1. In the **Connections** page select the "Total Board Size" that fits your surface. (We strongly recommend using the "fit to" options)
@@ -28,8 +20,17 @@ Select a playlist, decide whether to play on repeat and/or shuffle, then go to t
 
 Setting up a screensaver:
 
-- one trigger to set the timeout
-- one trigger to switch to page on timeout and start game
+- one trigger to set the timeout: (call it "Set Idle Timer")
+  - Set the Events to "On any Button Press" and "Startup"
+  - Set the Actions to "animation: Set the idle timer" (this will reset the timeout every time a button is pressed)
+
+- one trigger to switch the page on timeout and start game (call it "Start Screensaver")
+  - Set the Events to "On condition becoming true"
+  - Set the Condition to the feedback "animation: Idle Timeout"
+  - Set the Actions to "internal: Surface: Set to page" set it to the grid page
+  - (optional - set the playlist, repeat, shuffle, etc. or just set it up ahead of time)
+  - (optional - use feedback "Playlist is Empty" in an IF action to set the playlist only once, if repeat is enabled.)
+  - animation: Start/Stop (Play/Pause) the Game
 
 TIPS:
 

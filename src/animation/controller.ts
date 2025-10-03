@@ -300,6 +300,10 @@ export class GameController {
 		this.fullBoardsQueue = []
 	}
 
+	playlistIsEmpty(): boolean {
+		return this.fullBoardsQueue.length === 0
+	}
+
 	updateBoard(newBoard: Grid): void {
 		this.theGame.setBoard(newBoard)
 	}

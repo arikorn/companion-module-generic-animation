@@ -7,6 +7,7 @@ export function UpdateVariableDefinitions(self: AnimationInstance): void {
 		{ variableId: 'boardSize', name: 'Game of Life: board size' },
 		{ variableId: 'running', name: 'Game of Life: running' },
 		{ variableId: 'transitioning', name: 'Transitioning boards' },
+		{ variableId: 'idleTimeout', name: 'Idle Timeout' },
 	])
 }
 
@@ -17,5 +18,6 @@ export function updateVariableValues(self: AnimationInstance): void {
 		boardSize: `${self.boardSize.x}x${self.boardSize.y}`,
 		running: self.animation.isGameRunning(),
 		transitioning: self.animation.isWiping(),
+		idleTimeout: self.idleTimeout,
 	})
 }

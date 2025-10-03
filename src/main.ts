@@ -15,6 +15,8 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 	boardSize: Coord = { x: 11, y: 10 } // value is just a placeholder
 	on: string = cellCharChoices[0].id[0] // character representing "live" cells
 	off: string = cellCharChoices[0].id[1] // character representing "dead" cells
+	idleTimer: ReturnType<typeof setTimeout> | null = null
+	idleTimeout = false
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -36,6 +38,9 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 	// When module gets deleted
 	async destroy(): Promise<void> {
 		this.animation.stop() // stop any running game or transition
+		if (this.idleTimer !== null) {
+			clearTimeout(this.idleTimer)
+		}
 		this.log('debug', 'destroy')
 	}
 
@@ -189,6 +194,21 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 	stopGame(): void {
 		//debug: console.log(`main.stopGame()`)
 		this.animation.stop() // stop game and/or transition
+		this.updateEfffects()
+	}
+
+	// for screensaver functionality: user sets up a Trigger that resets the timeout every time a button is pressed
+	setIdleTimeout(minutes: number): void {
+		const ms = Math.round(minutes * 60000)
+		if (this.idleTimer !== null) {
+			clearTimeout(this.idleTimer)
+		}
+		this.idleTimer = setTimeout(() => {
+			this.idleTimeout = true
+			this.updateEfffects()
+		}, ms)
+
+		this.idleTimeout = false
 		this.updateEfffects()
 	}
 }

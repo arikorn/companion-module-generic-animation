@@ -26,6 +26,7 @@ const boardSizes = [
 // columns, rows within a button.
 const buttonSizes = [
 	[11, 10], // default and best
+	[10, 10], // for square pixels
 	[10, 9],
 	[9, 8],
 	[8, 7],

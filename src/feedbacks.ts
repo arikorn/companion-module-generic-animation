@@ -13,6 +13,8 @@ export function UpdateFeedbacks(self: AnimationInstance): void {
 			callback: async (_feedback, context) => {
 				const controlY = Number(await context.parseVariablesInString('$(this:row)'))
 				const controlX = Number(await context.parseVariablesInString('$(this:column)'))
+				//const controlPage = Number(await context.parseVariablesInString('$(this:page)'))
+				//self.log('debug', `page: ${controlPage}; x: ${controlX}; y: ${controlY}`)
 				const { y: bHeight, x: bWidth } = self.buttonGrid
 				const span = { x: controlX * bWidth, y: controlY * bHeight, w: bWidth, h: bHeight }
 				return {

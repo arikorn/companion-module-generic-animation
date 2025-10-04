@@ -790,7 +790,7 @@ setWithCategory(
 	[...gun_block1, ...gun1, ...gun_hrefl, ...gun_vrefl, ...gun_hvrefl, ...gun_block2],
 )
 setWithCategory(
-	'double gun, protected 55x30',
+	'double gun, protected on 55x30',
 	['continuous', 'glider generator'],
 	[
 		...getShape('double gun'),
@@ -799,7 +799,7 @@ setWithCategory(
 	],
 )
 setWithCategory(
-	'double gun protected 88x40',
+	'double gun, protected on 88x40',
 	['continuous', 'glider generator'],
 	[
 		...getShape('double gun'),
@@ -942,7 +942,7 @@ setWithCategory(
 
 // almost continously looping: ship grows the number of blinkers over time
 setWithCategory(
-	'blinker ship -grows',
+	'blinker ship - grows',
 	['curiosity'],
 	shapeFromBitmap([
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

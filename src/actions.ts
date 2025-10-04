@@ -9,6 +9,7 @@ import { BoardQueueItem } from './animation/controller.js'
 import { shapes, shapesByCategory } from './animation/shapes.js'
 import { buttonSizeDefault, buttonSizeChoices, boardSizeChoices, boardSizeDefault, cellCharChoices } from './config.js'
 import { readPNG } from './animation/utilities.js'
+import { Coord } from './animation/grid.js'
 
 // Make the menu choices from the keys of the map.
 //  If category is specified, filter for a particular category (uses the global variable shapesByCategory)
@@ -58,7 +59,11 @@ function createShapeOptions(self: AnimationInstance, allowMultiple = false): Som
 			id: 'category',
 			type: 'dropdown',
 			label: 'Select Category',
-			choices: [{ id: 'Custom_text', label: 'Custom text' }, ...makeChoicesFromMap(shapesByCategory)],
+			choices: [
+				{ id: 'Custom_text', label: 'Custom text' },
+				{ id: 'PNG_file', label: 'Import PNG File' },
+				...makeChoicesFromMap(shapesByCategory),
+			],
 			default: 'continuous',
 		},
 		...categoryMenus(allowMultiple),
@@ -68,6 +73,24 @@ function createShapeOptions(self: AnimationInstance, allowMultiple = false): Som
 			label: 'Text message:',
 			default: '',
 			isVisibleExpression: `$(options:category) === "Custom_text"`,
+		},
+		{
+			id: 'PNG_file',
+			type: 'textinput',
+			label: 'PNG Filename:',
+			default: '',
+			isVisibleExpression: `$(options:category) === "PNG_file"`,
+		},
+		{
+			id: 'threshold',
+			type: 'number',
+			label: 'Brightness Threshold',
+			default: -1,
+			min: -1,
+			max: 255,
+			range: true,
+			tooltip: 'Enter the threshold for converting grayscale images to bitmaps. Use -1 for an automated best-guess',
+			isVisibleExpression: `$(options:category) === "PNG_file"`,
 		},
 		{
 			id: 'alignment',
@@ -141,6 +164,7 @@ const onOffChoices = [
 	{ id: OnOff.Toggle, label: 'Toggle' },
 ]
 
+// ****************************************************************
 export function UpdateActions(self: AnimationInstance): void {
 	self.setActionDefinitions({
 		startGame: {
@@ -233,9 +257,18 @@ export function UpdateActions(self: AnimationInstance): void {
 			options: createShapeOptions(self),
 			callback: async (event) => {
 				const category = event.options?.category
-				let shapeName: string
+				let shapeName: string | Coord[]
 				if (category === 'Custom_text') {
 					shapeName = 'text'
+				} else if (category === 'PNG_file') {
+					const filename = event.options.PNG_file as string
+					const threshold = event.options.threshold as number
+					try {
+						shapeName = readPNG(filename, threshold, self.animation.getBoardSize())
+					} catch (error) {
+						console.error('Error reading PNG file:' + filename, error)
+						return
+					}
 				} else {
 					shapeName = event.options?.[category as string] as string
 				}

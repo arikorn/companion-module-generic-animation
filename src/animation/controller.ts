@@ -201,34 +201,38 @@ export class GameController {
 		}
 		const shapeExt = getShapeExtent(theShape) // [min:Coord, max:Coord]
 		const boardSize = this.getBoardSize()
-		// extent is inclusive, so have to add 1 here:
-		const shapeSize = { x: shapeExt[1].x + 1 - shapeExt[0].x, y: shapeExt[1].y + 1 - shapeExt[0].y }
-		const boardExcess = { x: boardSize.x - shapeSize.x, y: boardSize.y - shapeSize.y }
+		const midBoard = { y: (boardSize.y - 1) / 2, x: (boardSize.x - 1) / 2 }
+		const midShape = {
+			x: (shapeExt[1].x + shapeExt[0].x) / 2,
+			y: (shapeExt[1].y + shapeExt[0].y) / 2,
+		}
 		let topLeft: Coord = { x: 0, y: 0 }
 		switch (alignment) {
 			case 'center': {
-				topLeft = { x: Math.floor(boardExcess.x / 2), y: Math.floor(boardExcess.y / 2) }
+				topLeft = { x: midBoard.x - midShape.x, y: midBoard.y - midShape.y }
 				break
 			}
 			case 'top-center': {
-				topLeft = { x: Math.floor(boardExcess.x / 2), y: 0 - shapeExt[0].y }
+				topLeft = { x: midBoard.x - midShape.x, y: 0 - shapeExt[0].y }
 				break
 			}
 			case 'center-left': {
-				topLeft = { x: 0 - shapeExt[0].x, y: Math.floor(boardExcess.y / 2) }
+				topLeft = { x: 0 - shapeExt[0].x, y: midBoard.y - midShape.y }
 				break
 			}
 			case 'bottom-center': {
-				topLeft = { x: Math.floor(boardExcess.x / 2), y: boardExcess.y }
+				topLeft = { x: midBoard.x - midShape.x, y: boardSize.y - 1 - shapeExt[1].y }
 				break
 			}
 			case 'center-right': {
-				topLeft = { x: boardExcess.x, y: Math.floor(boardExcess.y / 2) }
+				topLeft = { x: boardSize.x - 1 - shapeExt[1].x, y: midBoard.y - midShape.y }
 				break
 			}
 			case 'none':
 				break
 		}
+		topLeft = { x: Math.floor(topLeft.x), y: Math.floor(topLeft.y) }
+
 		if (!isNaN(offset.x)) {
 			topLeft.x += offset.x
 		}

@@ -4,15 +4,15 @@
 
 For people testing "prerelease" versions
 
-1. Choose a folder for dev modules
+1. Choose a folder on your computer for dev modules
 2. In the Companion launch window click on the cog in the upper-right and set the "Developer module path" to the folder chosen in step 1. (If using v4.1 or later, make sure it is also enabled.)
-3. Download the module from the "releases" section on Githhub and unzip it into that folder (the module should be a subfolder of the dev module path)
+3. Download the module from the ["releases" section on Githhub](https://github.com/arikorn/companion-module-generic-animation/releases) and unzip it into that folder (the module should be a subfolder of the dev module path)
 
 The module will now show up in the **_Connections_** tab (but not in the Modules page, since it is not yet part of the official set of Companion modules).
 
 Read [HELP.md](./companion/HELP.md) (also shows up in the module help window) for further instructions
 
-# Introduction for Developers
+## For Developers: Introduction
 
 This module implements a low-resolution "screensaver" animation module in Companion that allows you to use all the buttons of a
 surface as a unified screen for animations. The low-resolution comes from the "pixels" being generated from glyphs for filled and open squares. In other words, this module "draws" by setting the button text to a segment of an underlying grid.

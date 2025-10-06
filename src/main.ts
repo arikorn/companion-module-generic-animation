@@ -17,6 +17,8 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 	off: string = cellCharChoices[0].id[1] // character representing "dead" cells
 	idleTimer: ReturnType<typeof setTimeout> | null = null
 	idleTimeout = false
+	screenButtons = new Map<string, number>()
+	screenPage = 0
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -210,6 +212,25 @@ export class AnimationInstance extends InstanceBase<AnimationConfig> {
 
 		this.idleTimeout = false
 		this.updateEfffects()
+	}
+
+	setScreenPage(id: string, pageNr: number): void {
+		this.screenButtons.set(id, pageNr)
+		const pages = Array.from(this.screenButtons.values()).sort()
+		// set the screenpage to the median value.
+		this.screenPage = pages[Math.floor(pages.length / 2)]
+		updateVariableValues(this)
+	}
+	unsetScreenPage(id: string): void {
+		this.screenButtons.delete(id)
+		if (this.screenButtons.size > 0) {
+			const pages = Array.from(this.screenButtons.values()).sort()
+			// set the screenpage to the median value.
+			this.screenPage = pages[Math.floor(pages.length / 2)]
+		} else {
+			this.screenPage = 0 // not valid
+		}
+		updateVariableValues(this)
 	}
 }
 

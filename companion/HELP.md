@@ -12,13 +12,15 @@ Currently implemented are simple wipe transitions in the four cardinal direction
 2. Go the **Buttons** page and choose a page to use for the animation screen
 3. Go to the **_Presets_** tab on the right side of the **Buttons** page and elect the **animation** group (i.e. this module)
 4. Select the **_Grid Button!_** group: it has only one button: drag it onto the board.
-   4a. Optional: if using as a scrrensaver, you can add the action "Surface: Set to page" and set it to "back".
-   4b. then copy it (ctrl-C/cmd-C) and then paste it (ctrl-V/cmd-V) to all the buttons on the page. (Or just drag the preset repeatedly.)
+   4a. Recommended: add the action "Surface: Set to page" and set it to "back" to this first button...
+   4b. then copy it (ctrl-C/cmd-C) and then paste it (ctrl-V/cmd-V) to all the buttons on the page.
 5. On a different page, set up the remaining presets, particularly the buttons from **_Board Content_**
 
 Select a playlist, decide whether to play on repeat and/or shuffle, then go to the "game" page and press any button to start/pause the game! (If you set the screensaver mode, pressing the button may take you away from the page, so you may need to start it on the settings page.)
 
 Setting up a screensaver:
+
+- "Shortcut": download the triggers companionconfig file from the Github release section and use the Triggers tab of the "Import Configuration" screen (comes up after you click "Import" on the "Import/Export page). Then go through each rule to customize for your needs.
 
 - one trigger to set the timeout: (call it "Set Idle Timer")
   - Set the Events to "On any Button Press" and "Startup"
@@ -27,7 +29,7 @@ Setting up a screensaver:
 - one trigger to switch the page on timeout and start game (call it "Start Screensaver")
   - Set the Events to "On condition becoming true"
   - Set the Condition to the feedback "animation: Idle Timeout"
-  - Set the Actions to "internal: Surface: Set to page" set it to the grid page
+  - Set the Actions to "internal: Surface: Set to page" set it to the grid page (tip: you can set it to the expression: `$(animation:screenPage)` )
   - (optional - set the playlist, repeat, shuffle, etc. or just set it up ahead of time)
   - (optional - use feedback "Playlist is Empty" in an IF action to set the playlist only once, if repeat is enabled.)
   - animation: Start/Stop (Play/Pause) the Game

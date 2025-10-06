@@ -22,6 +22,15 @@ export function UpdateFeedbacks(self: AnimationInstance): void {
 					show_topbar: false,
 				}
 			},
+			subscribe: async (action, context) => {
+				const pageNr = Number(await context.parseVariablesInString('$(this:page)'))
+				if (!isNaN(pageNr) && pageNr > 0) {
+					self.setScreenPage(action.id, pageNr)
+				}
+			},
+			unsubscribe: async (action) => {
+				self.unsetScreenPage(action.id)
+			},
 		},
 		GameIsRunning: {
 			type: 'boolean',

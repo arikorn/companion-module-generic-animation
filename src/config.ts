@@ -195,7 +195,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'showAdvancedConfig',
 			label: 'Show advanced config options',
 			width: 9,
-			default: defaultConfig.wrap,
+			default: defaultConfig.showAdvancedConfig,
 		},
 	]
 }

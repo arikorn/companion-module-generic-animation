@@ -233,7 +233,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 
 	for (const setting of single) {
 		presets[`setShape_${setting.name}`] = {
-			category: 'Board Content',
+			category: 'Playlists',
 			name: `Set Board to "${setting.name}" (Example)`,
 			type: 'button',
 			style: {
@@ -308,7 +308,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 
 	for (const setting of multi) {
 		presets[`setMultipleShapes_${setting.category}`] = {
-			category: 'Board Content',
+			category: 'Playlists',
 			name: `Set "${setting.category}" Playlist for Board (Example)`,
 			type: 'button',
 			style: {
@@ -339,7 +339,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 	}
 
 	presets.setShapeFromText = {
-		category: 'Board Content',
+		category: 'Playlists',
 		name: 'Set Board from Text',
 		type: 'button',
 		style: {
@@ -376,7 +376,7 @@ export function getPreset(_self: AnimationInstance): CompanionPresetDefinitions 
 	}
 
 	presets.setShapeFromPNG = {
-		category: 'Board Content',
+		category: 'Playlists',
 		name: 'Set Board from PNG file',
 		type: 'button',
 		style: {

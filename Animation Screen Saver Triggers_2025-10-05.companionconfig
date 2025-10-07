@@ -1,0 +1,103 @@
+version: 9
+type: full
+companionBuild: 4.1.1+8447-stable-d48898e1d9
+triggers:
+  ZyXDaiPqAG44bdAJ-KS8D:
+    type: trigger
+    options:
+      name: Set Idle Timer
+      enabled: true
+      sortOrder: 0
+      collectionId: wsCpKepcytTB9tBV0Mmr-
+    actions:
+      - id: txYb1HxtJWnlx9_BvdMzm
+        definitionId: setIdleTimer
+        connectionId: dx0jsjJR52IL0mMslydk1
+        options:
+          time: 5
+        upgradeIndex: -1
+        type: action
+    condition: []
+    events:
+      - id: s9MBARoL2YWJFskHYjU-l
+        type: button_press
+        enabled: true
+        options: {}
+      - id: SI2N3pnHGOrhRCLZdFSJj
+        type: startup
+        enabled: true
+        options:
+          delay: 10000
+    localVariables: []
+  9frsZZF61mu8R2PwZoZx7:
+    type: trigger
+    options:
+      name: Start Screensaver
+      enabled: true
+      sortOrder: 0
+      collectionId: wsCpKepcytTB9tBV0Mmr-
+    actions:
+      - id: B2fQChGnRhUMXPzL38X-E
+        definitionId: set_page
+        connectionId: internal
+        options:
+          controller_from_variable: false
+          controller: group:main
+          controller_variable: self
+          page_from_variable: true
+          page: 88
+          page_variable: $(animation:screenPage)
+        type: action
+        children: {}
+      - id: ZNbwEi22ZI-wweMPHzElG
+        definitionId: startGame
+        connectionId: dx0jsjJR52IL0mMslydk1
+        options:
+          action: 1
+        upgradeIndex: -1
+        type: action
+    condition:
+      - id: ITaaUjCGuOy346NcEDh9h
+        definitionId: IdleTimeout
+        connectionId: dx0jsjJR52IL0mMslydk1
+        options: {}
+        upgradeIndex: -1
+        type: feedback
+        style:
+          color: 0
+          bgcolor: 9573376
+        isInverted: false
+    events:
+      - id: xVXgPyqJBqu2mTnosILDW
+        type: condition_true
+        enabled: true
+        options: {}
+    localVariables: []
+triggerCollections:
+  - id: wsCpKepcytTB9tBV0Mmr-
+    label: Screensaver
+    sortOrder: 0
+    children: []
+    metaData:
+      enabled: true
+instances:
+  dx0jsjJR52IL0mMslydk1:
+    instance_type: generic-animation
+    moduleVersionId: dev
+    updatePolicy: stable
+    sortOrder: 8
+    label: animation
+    isFirstInit: false
+    config:
+      repeat: true
+      randomize: true
+      boardSize: fit5x3
+      buttonGrid: 10,10
+      updateRate: 5
+      onOffChars: ▉⬜
+      wrap: true
+      showAdvancedConfig: false
+    secrets: {}
+    lastUpgradeIndex: -1
+    enabled: true
+connectionCollections: []
